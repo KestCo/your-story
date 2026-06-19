@@ -130,6 +130,7 @@
           </div>
 
           <div id="movieFrame" class="movie-frame" aria-label="Story movie preview">
+            <div class="motion-progress" aria-hidden="true"><span id="motionProgress"></span></div>
             <div class="film-strip film-strip-left"></div>
             <div class="film-strip film-strip-right"></div>
             <div class="scene-glow"></div>
@@ -153,6 +154,11 @@
               <span id="sceneKicker"></span>
               <strong id="sceneTitle"></strong>
               <p id="sceneLine"></p>
+            </div>
+            <div class="scene-controls" aria-label="Story reel controls">
+              <button class="scene-control" type="button" id="previousSceneButton">Previous</button>
+              <button class="scene-control primary-scene-control" type="button" id="replaySceneButton">Replay Reel</button>
+              <button class="scene-control" type="button" id="nextSceneButton">Next Scene</button>
             </div>
           </div>
         </div>

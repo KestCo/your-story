@@ -29,6 +29,10 @@ const shotList = document.querySelector("#shotList");
 const moviePrompt = document.querySelector("#moviePrompt");
 const movieFrame = document.querySelector("#movieFrame");
 const posterPlace = document.querySelector("#posterPlace");
+const motionProgress = document.querySelector("#motionProgress");
+const previousSceneButton = document.querySelector("#previousSceneButton");
+const replaySceneButton = document.querySelector("#replaySceneButton");
+const nextSceneButton = document.querySelector("#nextSceneButton");
 
 const writerStoryList = document.querySelector("#writerStoryList");
 const writerDraftCount = document.querySelector("#writerDraftCount");
@@ -124,7 +128,10 @@ const state = {
   activeTemplateId: "",
   writerTemplateId: "",
   values: {},
-  cinematicTimer: null
+  cinematicTimer: null,
+  sceneTimer: null,
+  activeShotIndex: 0,
+  isPlaying: false
 };
 
 function clone(value) {
@@ -429,6 +436,14 @@ function buildShots() {
   }));
 }
 
+function buildSceneBeats() {
+  return buildShots().map((shot, index) => ({
+    kicker: `Scene ${index + 1}`,
+    title: shot.title,
+    line: shot.detail
+  }));
+}
+
 function buildMoviePrompt() {
   return renderTemplateString(activeTemplate().moviePromptTemplate);
 }
@@ -558,40 +573,129 @@ function sparkIdeas() {
   formMessage.textContent = "A fresh set of ideas is ready to reshape.";
 }
 
+function clearScenePlayback() {
+  clearTimeout(state.sceneTimer);
+  state.sceneTimer = null;
+  state.isPlaying = false;
+  movieFrame.classList.remove("is-playing");
+  replaySceneButton.textContent = "Replay Reel";
+}
+
+function setActiveShot(index, options = {}) {
+  const beats = buildSceneBeats();
+  if (!beats.length) {
+    return;
+  }
+
+  const normalizedIndex = ((index % beats.length) + beats.length) % beats.length;
+  const beat = beats[normalizedIndex];
+  state.activeShotIndex = normalizedIndex;
+
+  sceneKicker.textContent = `Scene ${normalizedIndex + 1} of ${beats.length}`;
+  sceneTitle.textContent = beat.title;
+  sceneLine.textContent = sentenceCase(beat.line);
+  movieFrame.dataset.scene = `scene-${normalizedIndex + 1}`;
+  motionProgress.style.width = `${((normalizedIndex + 1) / beats.length) * 100}%`;
+
+  shotList.querySelectorAll(".shot-card").forEach((shotButton, buttonIndex) => {
+    const active = buttonIndex === normalizedIndex;
+    shotButton.classList.toggle("active", active);
+    shotButton.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+
+  if (options.updateStatus) {
+    cinemaStatus.textContent = `Scene ${normalizedIndex + 1} selected`;
+  }
+}
+
+function showManualScene(index) {
+  clearScenePlayback();
+  movieFrame.classList.add("is-cinematic", "is-awake");
+  cinematicButton.textContent = "Replay Reel";
+  cinematicButton.disabled = false;
+  setActiveShot(index, { updateStatus: true });
+}
+
+function startScenePlayback(index = 0) {
+  const beats = buildSceneBeats();
+  if (!beats.length) {
+    return;
+  }
+
+  clearTimeout(state.sceneTimer);
+  state.isPlaying = true;
+  movieFrame.classList.add("is-cinematic", "is-awake", "is-playing");
+  replaySceneButton.textContent = "Replaying";
+  cinematicButton.textContent = "Replay Reel";
+  cinematicButton.disabled = false;
+  setActiveShot(index);
+  cinemaStatus.textContent = `Scene ${state.activeShotIndex + 1} moving`;
+
+  if (state.activeShotIndex >= beats.length - 1) {
+    state.sceneTimer = setTimeout(() => {
+      state.isPlaying = false;
+      movieFrame.classList.remove("is-playing");
+      cinemaStatus.textContent = "World alive";
+      replaySceneButton.textContent = "Replay Reel";
+    }, 2200);
+    return;
+  }
+
+  state.sceneTimer = setTimeout(() => {
+    startScenePlayback(state.activeShotIndex + 1);
+  }, 2400);
+}
+
+function showNextScene() {
+  showManualScene(state.activeShotIndex + 1);
+}
+
+function showPreviousScene() {
+  showManualScene(state.activeShotIndex - 1);
+}
+
 function renderCinematicPlan() {
+  clearScenePlayback();
+  clearTimeout(state.cinematicTimer);
+  state.cinematicTimer = null;
+  state.activeShotIndex = 0;
+
   const shots = buildShots();
   shotList.innerHTML = shots
     .map((shot, index) => {
       return `
-        <article class="shot-card">
+        <button class="shot-card" type="button" data-shot-index="${index}" aria-pressed="false">
           <span>${index + 1}</span>
           <div>
             <strong>${escapeHtml(shot.title)}</strong>
             <p>${escapeHtml(shot.detail)}</p>
           </div>
-        </article>
+        </button>
       `;
     })
     .join("");
+
+  shotList.querySelectorAll(".shot-card").forEach((shotButton) => {
+    shotButton.addEventListener("click", () => {
+      showManualScene(Number(shotButton.dataset.shotIndex));
+    });
+  });
 
   moviePrompt.value = buildMoviePrompt();
   cinemaStatus.textContent = "Ready";
   cinematicButton.textContent = "Bring My World Alive";
   cinematicButton.disabled = false;
-  movieFrame.classList.remove("is-building", "is-cinematic", "is-awake");
+  movieFrame.classList.remove("is-building", "is-cinematic", "is-awake", "is-playing");
   updatePosterVisuals();
+  setActiveShot(0);
 }
 
 function buildWorld() {
-  const template = activeTemplate();
   const story = buildStoryText();
   finalStory.textContent = story;
   worldLead.textContent = titleCase(plainValue("hero"));
   worldSetting.textContent = titleCase(plainValue("place"));
   worldMood.textContent = titleCase(`${plainValue("color")} ${plainValue("feeling")}`);
-  sceneKicker.textContent = renderTemplateString(template.scene.kicker);
-  sceneTitle.textContent = renderTemplateString(template.scene.title);
-  sceneLine.textContent = sentenceCase(renderTemplateString(template.scene.line));
   renderCinematicPlan();
   showScreen("reelScreen");
 }
@@ -632,9 +736,11 @@ function copyMoviePrompt() {
 
 function makeCinematic() {
   clearTimeout(state.cinematicTimer);
+  clearScenePlayback();
   cinematicButton.disabled = true;
   movieFrame.classList.add("is-building");
-  movieFrame.classList.remove("is-cinematic", "is-awake");
+  movieFrame.classList.remove("is-cinematic", "is-awake", "is-playing");
+  setActiveShot(0);
   cinemaStatus.textContent = "Checking words";
   cinematicButton.textContent = "Awakening";
 
@@ -643,11 +749,8 @@ function makeCinematic() {
     state.cinematicTimer = setTimeout(() => {
       cinemaStatus.textContent = "Setting motion";
       state.cinematicTimer = setTimeout(() => {
-        cinemaStatus.textContent = "World alive";
-        cinematicButton.textContent = "World Is Alive";
-        cinematicButton.disabled = false;
         movieFrame.classList.remove("is-building");
-        movieFrame.classList.add("is-cinematic", "is-awake");
+        startScenePlayback(0);
       }, 850);
     }, 800);
   }, 800);
@@ -996,6 +1099,9 @@ randomizeButton.addEventListener("click", sparkIdeas);
 copyButton.addEventListener("click", copyStory);
 copyPromptButton.addEventListener("click", copyMoviePrompt);
 cinematicButton.addEventListener("click", makeCinematic);
+previousSceneButton.addEventListener("click", showPreviousScene);
+replaySceneButton.addEventListener("click", () => startScenePlayback(0));
+nextSceneButton.addEventListener("click", showNextScene);
 writerResetButton.addEventListener("click", resetWriterDraft);
 writerCopyButton.addEventListener("click", copyWriterDraft);
 writerPlaytestButton.addEventListener("click", playtestWriterDraft);

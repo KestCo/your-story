@@ -573,10 +573,30 @@ h3 {
   grid-template-columns: 34px minmax(0, 1fr);
   gap: 10px;
   align-items: start;
+  width: 100%;
   padding: 11px;
   border: 1px solid #e3e8f0;
   border-radius: 8px;
   background: #f8f9fb;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.shot-card:hover,
+.shot-card:focus-visible {
+  border-color: rgba(215, 175, 99, 0.48);
+  background: #fffaf0;
+  outline: none;
+}
+
+.shot-card.active {
+  border-color: rgba(215, 175, 99, 0.72);
+  background: #fff7e4;
+  box-shadow: 0 12px 28px rgba(16, 20, 29, 0.08);
+  transform: translateX(3px);
 }
 
 .shot-card > span {
@@ -589,6 +609,11 @@ h3 {
   color: var(--ivory);
   font-size: 0.78rem;
   font-weight: 900;
+}
+
+.shot-card.active > span {
+  background: var(--gold);
+  color: #14171c;
 }
 
 .shot-card strong {
@@ -635,6 +660,17 @@ h3 {
   --poster-glow: #d7af63;
   --poster-accent: #6f879f;
   --poster-ground: #19283a;
+  --hero-x: 0px;
+  --hero-scale: 1;
+  --object-y: 0px;
+  --object-scale: 1;
+  --object-scale-active: 1.06;
+  --sound-scale: 1;
+  --sound-scale-soft: 0.94;
+  --sound-scale-active: 1.06;
+  --sound-opacity: 0.55;
+  --sound-opacity-soft: 0.36;
+  --poster-zoom: 1;
   position: relative;
   min-height: min(72vh, 620px);
   overflow: hidden;
@@ -646,6 +682,27 @@ h3 {
     linear-gradient(180deg, #172334 0%, #0d1723 100%);
   box-shadow: 0 28px 80px rgba(16, 20, 29, 0.22);
   transition: box-shadow 240ms ease, border-color 240ms ease, filter 240ms ease;
+}
+
+.motion-progress {
+  position: absolute;
+  top: 22px;
+  left: 56px;
+  right: 56px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(241, 234, 219, 0.14);
+  z-index: 6;
+}
+
+.motion-progress span {
+  display: block;
+  width: 20%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--poster-accent) 54%, #ffffff));
+  transition: width 520ms ease;
 }
 
 .movie-frame::before {
@@ -720,6 +777,7 @@ h3 {
     radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--poster-glow) 34%, transparent), transparent 22%),
     radial-gradient(circle at 74% 18%, color-mix(in srgb, var(--poster-accent) 30%, transparent), transparent 28%),
     linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.22));
+  transition: filter 420ms ease, opacity 420ms ease;
 }
 
 .poster-horizon {
@@ -731,6 +789,7 @@ h3 {
     radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--poster-glow) 28%, transparent), transparent 48%),
     linear-gradient(180deg, color-mix(in srgb, var(--poster-ground) 78%, transparent), var(--poster-ground));
   clip-path: polygon(0 48%, 18% 30%, 33% 42%, 50% 20%, 68% 38%, 84% 26%, 100% 44%, 100% 100%, 0 100%);
+  transition: clip-path 520ms ease, height 520ms ease;
 }
 
 .poster-place {
@@ -753,6 +812,9 @@ h3 {
   background: linear-gradient(180deg, #111318, #05070a);
   clip-path: polygon(42% 0, 58% 0, 70% 28%, 80% 100%, 20% 100%, 30% 28%);
   filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.42));
+  transform: translateX(var(--hero-x)) scale(var(--hero-scale));
+  transform-origin: 50% 100%;
+  transition: transform 520ms ease;
 }
 
 .poster-hero::before {
@@ -779,7 +841,8 @@ h3 {
   box-shadow:
     0 0 26px color-mix(in srgb, var(--poster-glow) 54%, transparent),
     0 0 80px color-mix(in srgb, var(--poster-glow) 28%, transparent);
-  transform: translateX(-50%) rotate(8deg);
+  transform: translateX(-50%) translateY(var(--object-y)) rotate(8deg) scale(var(--object-scale));
+  transition: transform 520ms ease, filter 420ms ease;
 }
 
 .poster-sound {
@@ -789,8 +852,9 @@ h3 {
   height: 76px;
   border-top: 1px solid color-mix(in srgb, var(--poster-accent) 54%, transparent);
   border-radius: 50%;
-  opacity: 0.55;
-  transform: rotate(-12deg);
+  opacity: var(--sound-opacity);
+  transform: rotate(-12deg) scale(var(--sound-scale));
+  transition: opacity 420ms ease, transform 520ms ease;
 }
 
 .poster-sound::before,
@@ -913,7 +977,7 @@ h3 {
 .movie-frame.is-awake .world-poster {
   border-color: color-mix(in srgb, var(--poster-glow) 54%, transparent);
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateY(0) scale(var(--poster-zoom));
 }
 
 .movie-frame.is-awake .poster-weather span {
@@ -928,11 +992,54 @@ h3 {
   animation: soundWave 1800ms ease-in-out infinite;
 }
 
+.movie-frame[data-scene="scene-1"] {
+  --hero-x: -10px;
+  --hero-scale: 0.96;
+  --poster-zoom: 1;
+}
+
+.movie-frame[data-scene="scene-2"] {
+  --object-y: -16px;
+  --object-scale: 1.1;
+  --object-scale-active: 1.16;
+  --poster-zoom: 1.02;
+}
+
+.movie-frame[data-scene="scene-3"] {
+  --poster-zoom: 1.04;
+}
+
+.movie-frame[data-scene="scene-3"] .poster-sky {
+  filter: saturate(1.24) brightness(1.08);
+}
+
+.movie-frame[data-scene="scene-4"] {
+  --sound-scale: 1.18;
+  --sound-scale-soft: 1.08;
+  --sound-scale-active: 1.25;
+  --sound-opacity: 0.86;
+  --sound-opacity-soft: 0.56;
+}
+
+.movie-frame[data-scene="scene-5"] {
+  --hero-x: 22px;
+  --hero-scale: 1.04;
+  --object-y: -8px;
+  --object-scale: 1.04;
+  --object-scale-active: 1.1;
+  --poster-zoom: 1.06;
+}
+
+.movie-frame[data-scene="scene-5"] .poster-horizon {
+  height: 44%;
+  clip-path: polygon(0 58%, 16% 36%, 34% 50%, 50% 18%, 69% 46%, 85% 30%, 100% 52%, 100% 100%, 0 100%);
+}
+
 .scene-card {
   position: absolute;
   left: 72px;
   right: 72px;
-  bottom: 52px;
+  bottom: 92px;
   display: grid;
   gap: 10px;
   padding: 22px;
@@ -942,6 +1049,11 @@ h3 {
   color: var(--ivory);
   backdrop-filter: blur(8px);
   z-index: 4;
+  transition: border-color 300ms ease, transform 300ms ease, box-shadow 300ms ease;
+}
+
+.movie-frame.is-playing .scene-card {
+  animation: sceneCardPulse 2400ms ease both;
 }
 
 .scene-card span {
@@ -964,6 +1076,49 @@ h3 {
   font-size: 1rem;
 }
 
+.scene-controls {
+  position: absolute;
+  left: 72px;
+  right: 72px;
+  bottom: 26px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 5;
+}
+
+.scene-control {
+  min-height: 36px;
+  border: 1px solid rgba(241, 234, 219, 0.2);
+  border-radius: 999px;
+  background: rgba(13, 23, 35, 0.72);
+  color: #dfe6ef;
+  padding: 8px 13px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 850;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.scene-control:hover,
+.scene-control:focus-visible {
+  border-color: rgba(215, 175, 99, 0.6);
+  background: rgba(24, 35, 50, 0.9);
+  outline: none;
+}
+
+.primary-scene-control {
+  background: var(--gold);
+  color: #14171c;
+}
+
+.primary-scene-control:hover,
+.primary-scene-control:focus-visible {
+  background: #f0c879;
+  color: #111318;
+}
+
 @keyframes weatherDrift {
   0% {
     transform: translateY(-22px) rotate(18deg);
@@ -983,12 +1138,12 @@ h3 {
 @keyframes objectPulse {
   0%,
   100% {
-    transform: translateX(-50%) rotate(8deg) scale(1);
+    transform: translateX(-50%) translateY(var(--object-y)) rotate(8deg) scale(var(--object-scale));
     filter: brightness(1);
   }
 
   50% {
-    transform: translateX(-50%) rotate(8deg) scale(1.06);
+    transform: translateX(-50%) translateY(var(--object-y)) rotate(8deg) scale(var(--object-scale-active));
     filter: brightness(1.18);
   }
 }
@@ -996,13 +1151,32 @@ h3 {
 @keyframes soundWave {
   0%,
   100% {
-    opacity: 0.36;
-    transform: rotate(-12deg) scale(0.94);
+    opacity: var(--sound-opacity-soft);
+    transform: rotate(-12deg) scale(var(--sound-scale-soft));
   }
 
   50% {
-    opacity: 0.72;
-    transform: rotate(-12deg) scale(1.06);
+    opacity: var(--sound-opacity);
+    transform: rotate(-12deg) scale(var(--sound-scale-active));
+  }
+}
+
+@keyframes sceneCardPulse {
+  0% {
+    border-color: rgba(215, 175, 99, 0.2);
+    transform: translateY(6px);
+  }
+
+  18%,
+  72% {
+    border-color: rgba(215, 175, 99, 0.54);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+    transform: translateY(0);
+  }
+
+  100% {
+    border-color: rgba(241, 234, 219, 0.22);
+    transform: translateY(0);
   }
 }
 
@@ -1337,8 +1511,13 @@ h3 {
     min-height: 520px;
   }
 
+  .motion-progress {
+    left: 38px;
+    right: 38px;
+  }
+
   .world-poster {
-    inset: 32px 38px 150px;
+    inset: 32px 38px 168px;
   }
 
   .poster-hero {
@@ -1359,6 +1538,17 @@ h3 {
   .scene-card {
     left: 42px;
     right: 42px;
-    bottom: 38px;
+    bottom: 88px;
+  }
+
+  .scene-controls {
+    left: 42px;
+    right: 42px;
+    bottom: 28px;
+  }
+
+  .scene-control {
+    flex: 1;
+    padding: 8px 6px;
   }
 }
