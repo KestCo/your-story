@@ -29,6 +29,7 @@ const shotList = document.querySelector("#shotList");
 const moviePrompt = document.querySelector("#moviePrompt");
 const movieFrame = document.querySelector("#movieFrame");
 const posterPlace = document.querySelector("#posterPlace");
+const generatedPoster = document.querySelector("#generatedPoster");
 const motionProgress = document.querySelector("#motionProgress");
 const previousSceneButton = document.querySelector("#previousSceneButton");
 const replaySceneButton = document.querySelector("#replaySceneButton");
@@ -131,7 +132,8 @@ const state = {
   cinematicTimer: null,
   sceneTimer: null,
   activeShotIndex: 0,
-  isPlaying: false
+  isPlaying: false,
+  aiRequestInFlight: false
 };
 
 function clone(value) {
@@ -448,6 +450,20 @@ function buildMoviePrompt() {
   return renderTemplateString(activeTemplate().moviePromptTemplate);
 }
 
+function buildWorldPayload() {
+  const template = activeTemplate();
+  return {
+    story: buildStoryText(),
+    moviePrompt: buildMoviePrompt(),
+    template: {
+      id: template.id,
+      title: template.title,
+      tone: template.tone
+    },
+    details: Object.fromEntries(template.fields.map((field) => [field.id, plainValue(field.id)]))
+  };
+}
+
 function updatePreview() {
   storyDraft.innerHTML = buildStoryHtml();
   updateProgress();
@@ -654,11 +670,65 @@ function showPreviousScene() {
   showManualScene(state.activeShotIndex - 1);
 }
 
+function resetGeneratedPoster() {
+  generatedPoster.hidden = true;
+  generatedPoster.removeAttribute("src");
+  movieFrame.classList.remove("has-generated-poster", "is-rendering-ai");
+}
+
+async function requestGeneratedWorld() {
+  if (state.aiRequestInFlight) {
+    return;
+  }
+
+  state.aiRequestInFlight = true;
+  movieFrame.classList.add("is-rendering-ai");
+  cinemaStatus.textContent = "Rendering poster";
+
+  try {
+    const response = await fetch("/api/create-world", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(buildWorldPayload())
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok || !result.ok) {
+      cinemaStatus.textContent = result.message || "Local preview active";
+      return;
+    }
+
+    if (!result.configured) {
+      cinemaStatus.textContent = "Local preview active";
+      return;
+    }
+
+    if (result.imageUrl) {
+      generatedPoster.src = result.imageUrl;
+      generatedPoster.hidden = false;
+      movieFrame.classList.add("has-generated-poster");
+      cinemaStatus.textContent = "Poster rendered";
+      return;
+    }
+
+    cinemaStatus.textContent = "Local preview active";
+  } catch (_error) {
+    cinemaStatus.textContent = "Local preview active";
+  } finally {
+    state.aiRequestInFlight = false;
+    movieFrame.classList.remove("is-rendering-ai");
+  }
+}
+
 function renderCinematicPlan() {
   clearScenePlayback();
   clearTimeout(state.cinematicTimer);
   state.cinematicTimer = null;
   state.activeShotIndex = 0;
+  resetGeneratedPoster();
 
   const shots = buildShots();
   shotList.innerHTML = shots
@@ -751,6 +821,7 @@ function makeCinematic() {
       state.cinematicTimer = setTimeout(() => {
         movieFrame.classList.remove("is-building");
         startScenePlayback(0);
+        requestGeneratedWorld();
       }, 850);
     }, 800);
   }, 800);

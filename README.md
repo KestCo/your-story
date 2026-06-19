@@ -15,6 +15,7 @@ Your Story is an early prototype for an ad-lib story game where the player's wor
 - Story reel result screen
 - Five-shot cinematic storyboard
 - AI-ready movie prompt copy flow
+- Protected AI poster endpoint at `/api/create-world`
 - Dynamic story poster reveal driven by the player's words
 - Daily story selection from a template library
 - Story Writer Portal at `/?writer=1`
@@ -27,6 +28,19 @@ Writers can also set minimum and maximum word counts for each blank. Players get
 
 The portal includes a final ready board for story quality checks: blank usage, movie prompt usage, word limits, spark ideas, story length, movie prompt guardrails, and five-shot reel completeness.
 
+## AI poster setup
+
+`Bring My World Alive` starts with the local animated reel, then calls `/api/create-world` to render a generated poster when the site has an OpenAI key.
+
+Set these environment variables in Vercel:
+
+- `OPENAI_API_KEY` - required for generated posters
+- `OPENAI_IMAGE_MODEL` - optional, defaults to `gpt-image-2`
+- `OPENAI_IMAGE_SIZE` - optional, defaults to `1024x1024`
+- `OPENAI_IMAGE_QUALITY` - optional, defaults to `low`
+
+The endpoint runs moderation first, then image generation. API keys should never be placed in the browser.
+
 ## Future backend
 
-The real AI movie version should use a server-side endpoint for moderation and image/video generation. API keys should never be placed in the browser.
+The real AI movie version should build on the same server-side path, adding a video job request and polling flow after the generated poster feels right.
