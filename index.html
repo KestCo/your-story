@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Story</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="entryScreen" class="screen screen-active" aria-labelledby="entryTitle">
+        <button class="logo-entry" type="button" data-screen="welcomeScreen" aria-label="Enter Your Story">
+          <img src="assets/your-story-logo.png" alt="Your Story" />
+        </button>
+        <h1 id="entryTitle" class="sr-only">Your Story</h1>
+      </section>
+
+      <section id="welcomeScreen" class="screen" aria-labelledby="welcomeTitle">
+        <div class="welcome-layout">
+          <img class="welcome-logo" src="assets/your-story-logo.png" alt="Your Story" />
+          <div class="welcome-copy">
+            <p class="eyebrow">Story Lab</p>
+            <h2 id="welcomeTitle">Your words. Your world.</h2>
+            <p id="welcomeDescription" class="welcome-line">A short story becomes a tiny cinematic world shaped by the words you choose.</p>
+          </div>
+
+          <div class="welcome-panel">
+            <div>
+              <span class="panel-label">Today's Story</span>
+              <strong id="welcomeStoryTitle">The Door in the Weather</strong>
+            </div>
+            <div>
+              <span class="panel-label">Length</span>
+              <strong id="welcomeStoryLength">5 scenes</strong>
+            </div>
+            <div>
+              <span class="panel-label">Tone</span>
+              <strong id="welcomeStoryTone">Wonder</strong>
+            </div>
+          </div>
+
+          <button class="primary-action" type="button" data-screen="storyScreen">Start Your Story</button>
+        </div>
+      </section>
+
+      <section id="storyScreen" class="screen" aria-labelledby="storyTitle">
+        <div class="game-header">
+          <div>
+            <p id="storyEyebrow" class="eyebrow">Story 1</p>
+            <h2 id="storyTitle">The Door in the Weather</h2>
+          </div>
+          <div class="completion-ring" aria-label="Story progress">
+            <span id="progressCount">0</span>
+            <small>/8</small>
+          </div>
+        </div>
+
+        <div class="story-grid">
+          <form id="wordForm" class="word-form">
+            <div class="form-heading">
+              <h3>Story ingredients</h3>
+              <p>Write in the story. These keep track of the pieces.</p>
+            </div>
+
+            <div class="field-list" id="fieldList"></div>
+
+            <p id="formMessage" class="form-message" aria-live="polite"></p>
+          </form>
+
+          <aside class="story-preview" aria-labelledby="previewTitle">
+            <div class="preview-topline">
+              <span class="panel-label">Write In The Story</span>
+              <span id="filledCount">0 details placed</span>
+            </div>
+            <h3 id="previewTitle">Fill the blanks where they appear</h3>
+            <p id="storyDraft"></p>
+            <div class="story-action-row">
+              <button class="secondary-action" type="button" id="randomizeButton">Spark Ideas</button>
+              <button class="primary-action" type="submit" form="wordForm">Build My World</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="reelScreen" class="screen" aria-labelledby="reelTitle">
+        <div class="reel-layout">
+          <div class="reel-copy">
+            <p class="eyebrow">Story Reel</p>
+            <h2 id="reelTitle">Your world is awake.</h2>
+            <p id="finalStory" class="final-story"></p>
+
+            <div class="world-board">
+              <div>
+                <span class="panel-label">Lead</span>
+                <strong id="worldLead"></strong>
+              </div>
+              <div>
+                <span class="panel-label">Setting</span>
+                <strong id="worldSetting"></strong>
+              </div>
+              <div>
+                <span class="panel-label">Mood</span>
+                <strong id="worldMood"></strong>
+              </div>
+            </div>
+
+            <section class="cinema-panel" aria-labelledby="cinemaTitle">
+              <div class="cinema-heading">
+                <div>
+                  <span class="panel-label">Movie Plan</span>
+                  <h3 id="cinemaTitle">Five-shot story reel</h3>
+                </div>
+                <span id="cinemaStatus" class="cinema-status">Ready</span>
+              </div>
+
+              <div id="shotList" class="shot-list"></div>
+
+              <div class="movie-prompt-card">
+                <label for="moviePrompt">AI movie prompt</label>
+                <textarea id="moviePrompt" readonly></textarea>
+              </div>
+            </section>
+
+            <div class="action-row">
+              <button class="primary-action" type="button" id="cinematicButton">Bring My World Alive</button>
+              <button class="secondary-action" type="button" id="copyPromptButton">Copy Movie Prompt</button>
+              <button class="secondary-action" type="button" id="copyButton">Copy Story</button>
+              <button class="secondary-action" type="button" data-screen="storyScreen">Write Another</button>
+            </div>
+          </div>
+
+          <div id="movieFrame" class="movie-frame" aria-label="Story movie preview">
+            <div class="film-strip film-strip-left"></div>
+            <div class="film-strip film-strip-right"></div>
+            <div class="scene-glow"></div>
+            <div class="world-poster" aria-hidden="true">
+              <div class="poster-sky"></div>
+              <div class="poster-weather">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div class="poster-horizon"></div>
+              <div class="poster-place" id="posterPlace"></div>
+              <div class="poster-hero"></div>
+              <div class="poster-object"></div>
+              <div class="poster-sound"></div>
+            </div>
+            <div class="scene-card">
+              <span id="sceneKicker"></span>
+              <strong id="sceneTitle"></strong>
+              <p id="sceneLine"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="writerScreen" class="screen" aria-labelledby="writerTitle">
+        <div class="writer-layout">
+          <header class="writer-header">
+            <div>
+              <p class="eyebrow">Story Writer Portal</p>
+              <h2 id="writerTitle">Shape the story frame.</h2>
+            </div>
+            <button class="secondary-action" type="button" data-screen="entryScreen">Back to Game</button>
+          </header>
+
+          <div class="writer-grid">
+            <aside class="writer-list-panel" aria-labelledby="writerStoryListTitle">
+              <div class="writer-panel-heading">
+                <h3 id="writerStoryListTitle">Story Library</h3>
+                <span id="writerDraftCount" class="cinema-status">0 drafts</span>
+              </div>
+              <div id="writerStoryList" class="writer-story-list"></div>
+            </aside>
+
+            <form id="writerForm" class="writer-form">
+              <div class="writer-form-top">
+                <label class="writer-field">
+                  <span>Title</span>
+                  <input id="writerTitleInput" type="text" />
+                </label>
+                <label class="writer-field">
+                  <span>Tone</span>
+                  <input id="writerToneInput" type="text" />
+                </label>
+                <label class="writer-field">
+                  <span>Length</span>
+                  <input id="writerLengthInput" type="text" />
+                </label>
+              </div>
+
+              <label class="writer-field">
+                <span>Welcome description</span>
+                <textarea id="writerDescriptionInput"></textarea>
+              </label>
+
+              <label class="writer-field">
+                <span>Story template</span>
+                <textarea id="writerStoryTemplateInput"></textarea>
+              </label>
+
+              <div class="writer-note">
+                Use placeholders like <strong>{hero}</strong>, <strong>{object}</strong>, <strong>{place}</strong>, <strong>{weather}</strong>, <strong>{feeling}</strong>, <strong>{color}</strong>, <strong>{sound}</strong>, and <strong>{secret}</strong>.
+              </div>
+
+              <section class="writer-fields-panel" aria-labelledby="writerFieldsTitle">
+                <div class="writer-panel-heading">
+                  <h3 id="writerFieldsTitle">Player Blanks</h3>
+                  <span class="panel-label">Labels, examples, spark ideas</span>
+                </div>
+                <div id="writerFields" class="writer-fields"></div>
+              </section>
+
+              <label class="writer-field">
+                <span>AI movie prompt template</span>
+                <textarea id="writerMoviePromptInput"></textarea>
+              </label>
+
+              <section class="writer-ready-panel" aria-labelledby="writerReadyTitle">
+                <div class="writer-panel-heading">
+                  <div>
+                    <span class="panel-label">Final Check Board</span>
+                    <h3 id="writerReadyTitle">Story ready checks</h3>
+                  </div>
+                  <span id="writerReadyCount" class="cinema-status">0 of 7 ready</span>
+                </div>
+                <div id="writerReadyList" class="writer-ready-list"></div>
+              </section>
+
+              <p id="writerMessage" class="form-message" aria-live="polite"></p>
+
+              <div class="action-row">
+                <button class="secondary-action" type="button" id="writerResetButton">Reset Draft</button>
+                <button class="secondary-action" type="button" id="writerCopyButton">Copy Draft JSON</button>
+                <button class="secondary-action" type="button" id="writerPlaytestButton">Playtest Draft</button>
+                <button class="primary-action" type="submit">Save Draft</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
