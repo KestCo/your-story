@@ -41,6 +41,10 @@ Set these environment variables in Vercel:
 
 The endpoint runs moderation first, then image generation. API keys should never be placed in the browser.
 
+## Studio Analytics
+
+`studio-analytics.js` sends privacy-light story events to the shared KestCo Game Studio dashboard when `studio-analytics-config.js` has a Supabase URL and public anon key. It tracks starts, worlds built, Spark Ideas, writer opens, and poster outcomes without storing player-written story text.
+
 ## Future backend
 
 The real AI movie version should build on the same server-side path, adding a video job request and polling flow after the generated poster feels right.

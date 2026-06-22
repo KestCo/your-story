@@ -140,6 +140,10 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function trackStudioEvent(eventName, payload = {}) {
+  window.KestCoAnalytics?.track(eventName, payload);
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => {
     const entities = {
@@ -231,6 +235,12 @@ function showScreen(id) {
   });
 
   if (id === "storyScreen") {
+    trackStudioEvent("story_started", {
+      story_id: activeTemplate().id,
+      story_number: activeTemplate().storyNumber,
+      tone: activeTemplate().tone
+    });
+
     requestAnimationFrame(() => {
       const firstEmpty = activeTemplate().fields.find((field) => !state.values[field.id]);
       const target = firstEmpty ? document.querySelector(`#${firstEmpty.id}`) : document.querySelector("#hero");
@@ -239,6 +249,9 @@ function showScreen(id) {
   }
 
   if (id === "writerScreen") {
+    trackStudioEvent("writer_opened", {
+      story_id: activeTemplate().id
+    });
     renderWriterPortal();
   }
 }
@@ -579,6 +592,11 @@ function renderFields() {
 }
 
 function sparkIdeas() {
+  trackStudioEvent("spark_ideas", {
+    story_id: activeTemplate().id,
+    field_count: activeTemplate().fields.length
+  });
+
   activeTemplate().fields.forEach((field) => {
     const options = field.spark.length ? field.spark : [field.placeholder];
     state.values[field.id] = options[Math.floor(Math.random() * options.length)];
@@ -684,6 +702,10 @@ async function requestGeneratedWorld() {
   state.aiRequestInFlight = true;
   movieFrame.classList.add("is-rendering-ai");
   cinemaStatus.textContent = "Rendering poster";
+  trackStudioEvent("poster_requested", {
+    story_id: activeTemplate().id,
+    story_number: activeTemplate().storyNumber
+  });
 
   try {
     const response = await fetch("/api/create-world", {
@@ -698,11 +720,18 @@ async function requestGeneratedWorld() {
 
     if (!response.ok || !result.ok) {
       cinemaStatus.textContent = result.message || "Local preview active";
+      trackStudioEvent("poster_failed", {
+        story_id: activeTemplate().id,
+        reason: result.blocked ? "moderation" : "request_failed"
+      });
       return;
     }
 
     if (!result.configured) {
       cinemaStatus.textContent = "Local preview active";
+      trackStudioEvent("poster_local_preview", {
+        story_id: activeTemplate().id
+      });
       return;
     }
 
@@ -711,12 +740,23 @@ async function requestGeneratedWorld() {
       generatedPoster.hidden = false;
       movieFrame.classList.add("has-generated-poster");
       cinemaStatus.textContent = "Poster rendered";
+      trackStudioEvent("poster_generated", {
+        story_id: activeTemplate().id
+      });
       return;
     }
 
     cinemaStatus.textContent = "Local preview active";
+    trackStudioEvent("poster_failed", {
+      story_id: activeTemplate().id,
+      reason: "no_image"
+    });
   } catch (_error) {
     cinemaStatus.textContent = "Local preview active";
+    trackStudioEvent("poster_failed", {
+      story_id: activeTemplate().id,
+      reason: "network"
+    });
   } finally {
     state.aiRequestInFlight = false;
     movieFrame.classList.remove("is-rendering-ai");
@@ -768,6 +808,11 @@ function buildWorld() {
   worldMood.textContent = titleCase(`${plainValue("color")} ${plainValue("feeling")}`);
   renderCinematicPlan();
   showScreen("reelScreen");
+  trackStudioEvent("world_built", {
+    story_id: activeTemplate().id,
+    story_number: activeTemplate().storyNumber,
+    completed_fields: activeTemplate().fields.filter((field) => state.values[field.id]).length
+  });
 }
 
 function copyText(text, button, successLabel) {
