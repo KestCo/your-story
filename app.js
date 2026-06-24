@@ -21,6 +21,8 @@ const finalStory = document.querySelector("#finalStory");
 const worldLead = document.querySelector("#worldLead");
 const worldSetting = document.querySelector("#worldSetting");
 const worldMood = document.querySelector("#worldMood");
+const worldDetails = document.querySelector("#worldDetails");
+const worldTokens = document.querySelector("#worldTokens");
 const sceneKicker = document.querySelector("#sceneKicker");
 const sceneTitle = document.querySelector("#sceneTitle");
 const sceneLine = document.querySelector("#sceneLine");
@@ -54,6 +56,14 @@ const writerPlaytestButton = document.querySelector("#writerPlaytestButton");
 
 const PLAYER_DRAFT_PREFIX = "yourStoryPlayerDraft:";
 const TEMPLATE_DRAFTS_KEY = "yourStoryTemplateDrafts";
+
+const SCENE_FIELD_FOCUS = [
+  ["place", "weather"],
+  ["hero", "object"],
+  ["color", "feeling"],
+  ["sound", "weather"],
+  ["secret", "hero"]
+];
 
 const DEFAULT_WORD_LIMITS = {
   hero: { min: 1, max: 5 },
@@ -477,6 +487,58 @@ function buildWorldPayload() {
   };
 }
 
+function sceneFocusIds(index) {
+  const fields = activeTemplate().fields.map((field) => field.id);
+  const focus = SCENE_FIELD_FOCUS[index] || [];
+  const knownFocus = focus.filter((id) => fields.includes(id));
+
+  if (knownFocus.length) {
+    return knownFocus;
+  }
+
+  return fields.slice(index, index + 2).concat(fields.slice(0, Math.max(0, index + 2 - fields.length))).slice(0, 2);
+}
+
+function renderWorldDetails() {
+  worldDetails.innerHTML = activeTemplate()
+    .fields.map((field) => {
+      return `
+        <div class="world-detail" data-field-id="${escapeHtml(field.id)}">
+          <span>${escapeHtml(field.label)}</span>
+          <strong>${escapeHtml(titleCase(plainValue(field.id)))}</strong>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderWorldTokens() {
+  worldTokens.innerHTML = activeTemplate()
+    .fields.filter((field) => plainValue(field.id))
+    .slice(0, 8)
+    .map((field, index) => {
+      return `
+        <span class="world-token token-${index + 1}" data-field-id="${escapeHtml(field.id)}">
+          <small>${escapeHtml(field.label)}</small>
+          ${escapeHtml(titleCase(plainValue(field.id)))}
+        </span>
+      `;
+    })
+    .join("");
+}
+
+function highlightWorldDetails(index) {
+  const focus = sceneFocusIds(index);
+
+  worldDetails.querySelectorAll(".world-detail").forEach((detail) => {
+    detail.classList.toggle("active", focus.includes(detail.dataset.fieldId));
+  });
+
+  worldTokens.querySelectorAll(".world-token").forEach((token) => {
+    token.classList.toggle("active", focus.includes(token.dataset.fieldId));
+  });
+}
+
 function updatePreview() {
   storyDraft.innerHTML = buildStoryHtml();
   updateProgress();
@@ -630,6 +692,7 @@ function setActiveShot(index, options = {}) {
   sceneLine.textContent = sentenceCase(beat.line);
   movieFrame.dataset.scene = `scene-${normalizedIndex + 1}`;
   motionProgress.style.width = `${((normalizedIndex + 1) / beats.length) * 100}%`;
+  highlightWorldDetails(normalizedIndex);
 
   shotList.querySelectorAll(".shot-card").forEach((shotButton, buttonIndex) => {
     const active = buttonIndex === normalizedIndex;
@@ -806,6 +869,8 @@ function buildWorld() {
   worldLead.textContent = titleCase(plainValue("hero"));
   worldSetting.textContent = titleCase(plainValue("place"));
   worldMood.textContent = titleCase(`${plainValue("color")} ${plainValue("feeling")}`);
+  renderWorldDetails();
+  renderWorldTokens();
   renderCinematicPlan();
   showScreen("reelScreen");
   trackStudioEvent("world_built", {

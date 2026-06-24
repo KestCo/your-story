@@ -198,6 +198,47 @@ h3 {
   font-size: 1rem;
 }
 
+.world-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.world-detail {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+
+.world-detail.active {
+  border-color: color-mix(in srgb, var(--gold) 70%, #ffffff);
+  background: #fff9ea;
+  box-shadow: 0 12px 28px rgba(215, 175, 99, 0.14);
+  transform: translateY(-1px);
+}
+
+.world-detail span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.world-detail strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.96rem;
+}
+
 .primary-action,
 .secondary-action {
   min-height: 54px;
@@ -788,6 +829,93 @@ h3 {
 
 .movie-frame.has-generated-poster .world-poster {
   opacity: 0;
+}
+
+.world-tokens {
+  position: absolute;
+  inset: 42px 56px 142px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.world-token {
+  position: absolute;
+  display: grid;
+  gap: 2px;
+  max-width: 34%;
+  padding: 8px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(241, 234, 219, 0.2);
+  border-radius: 999px;
+  background: rgba(13, 23, 35, 0.5);
+  color: rgba(241, 234, 219, 0.72);
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.46;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(8px);
+  transition: opacity 240ms ease, transform 240ms ease, border-color 240ms ease, background-color 240ms ease, color 240ms ease;
+}
+
+.world-token small {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--gold);
+  font-size: 0.58rem;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.world-token.active {
+  opacity: 1;
+  color: #ffffff;
+  border-color: color-mix(in srgb, var(--poster-glow) 62%, transparent);
+  background: rgba(13, 23, 35, 0.78);
+  transform: translateY(-4px) scale(1.04);
+}
+
+.token-1 {
+  top: 22px;
+  left: 28px;
+}
+
+.token-2 {
+  top: 24px;
+  right: 34px;
+}
+
+.token-3 {
+  top: 42%;
+  left: 20px;
+}
+
+.token-4 {
+  top: 36%;
+  right: 24px;
+}
+
+.token-5 {
+  left: 30px;
+  bottom: 30px;
+}
+
+.token-6 {
+  right: 32px;
+  bottom: 34px;
+}
+
+.token-7 {
+  top: 18%;
+  left: 42%;
+}
+
+.token-8 {
+  left: 43%;
+  bottom: 18px;
 }
 
 .movie-frame.is-rendering-ai .scene-glow {
@@ -1521,7 +1649,8 @@ h3 {
 
   .field-list,
   .welcome-panel,
-  .world-board {
+  .world-board,
+  .world-details {
     grid-template-columns: 1fr;
   }
 
@@ -1543,6 +1672,10 @@ h3 {
 
   .movie-frame {
     min-height: 520px;
+  }
+
+  .world-tokens {
+    display: none;
   }
 
   .motion-progress {
