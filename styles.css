@@ -954,37 +954,45 @@ h3 {
   z-index: 3;
 }
 
-.generated-poster {
+.generated-poster-stage {
   position: absolute;
   inset: 42px 56px 142px;
-  width: auto;
-  max-width: none;
-  height: auto;
+  overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--poster-glow) 52%, transparent);
   border-radius: 8px;
-  object-fit: cover;
+  background: linear-gradient(180deg, rgba(13, 23, 35, 0.72), rgba(5, 7, 10, 0.92));
   box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.28), 0 22px 70px rgba(0, 0, 0, 0.28);
-  filter: brightness(var(--poster-brightness)) saturate(var(--poster-saturation));
   opacity: 0;
   transform: translateY(10px) scale(0.985);
-  transform-origin: var(--poster-origin-x) var(--poster-origin-y);
-  transition: opacity 520ms ease, transform 900ms ease, filter 720ms ease, border-color 420ms ease;
-  will-change: transform, filter;
+  transition: opacity 520ms ease, transform 520ms ease, border-color 420ms ease;
   z-index: 3;
 }
 
-.generated-poster:not([hidden]) {
+.generated-poster-stage:not([hidden]) {
   display: block;
 }
 
-.movie-frame.has-generated-poster .generated-poster {
-  opacity: 1;
+.generated-poster {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  filter: brightness(var(--poster-brightness)) saturate(var(--poster-saturation));
   transform: translate(var(--poster-pan-x), var(--poster-pan-y)) scale(var(--poster-scale));
+  transform-origin: var(--poster-origin-x) var(--poster-origin-y);
+  transition: transform 900ms ease, filter 720ms ease, opacity 360ms ease;
+  will-change: transform, filter;
+}
+
+.movie-frame.has-generated-poster .generated-poster-stage {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .movie-frame.is-playing.has-generated-poster .generated-poster,
 .movie-frame.is-shifting.has-generated-poster .generated-poster {
-  transition: transform 1550ms cubic-bezier(0.2, 0.78, 0.2, 1), filter 1200ms ease;
+  transition: transform 1550ms cubic-bezier(0.2, 0.78, 0.2, 1), filter 1200ms ease, opacity 360ms ease;
 }
 
 .movie-frame.has-generated-poster .world-poster {
@@ -1972,7 +1980,7 @@ h3 {
     inset: 32px 38px 168px;
   }
 
-  .generated-poster,
+  .generated-poster-stage,
   .scene-wash,
   .camera-sweep {
     inset: 32px 38px 168px;

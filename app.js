@@ -33,6 +33,7 @@ const shotList = document.querySelector("#shotList");
 const moviePrompt = document.querySelector("#moviePrompt");
 const movieFrame = document.querySelector("#movieFrame");
 const posterPlace = document.querySelector("#posterPlace");
+const generatedPosterStage = document.querySelector("#generatedPosterStage");
 const generatedPoster = document.querySelector("#generatedPoster");
 const motionProgress = document.querySelector("#motionProgress");
 const previousSceneButton = document.querySelector("#previousSceneButton");
@@ -163,7 +164,9 @@ const state = {
   sceneTimer: null,
   activeShotIndex: 0,
   isPlaying: false,
-  aiRequestInFlight: false
+  aiRequestInFlight: false,
+  scenePosters: [],
+  generatedPosterUrl: ""
 };
 
 function clone(value) {
@@ -493,11 +496,28 @@ function buildMoviePrompt() {
   return renderTemplateString(activeTemplate().moviePromptTemplate);
 }
 
+function buildScenePayloads() {
+  return buildSceneBeats().map((beat, index) => ({
+    index,
+    title: beat.title,
+    line: sentenceCase(beat.line),
+    focus: sceneFocusIds(index).map((id) => {
+      const field = getField(id);
+      return {
+        id,
+        label: field?.label || id,
+        value: plainValue(id)
+      };
+    })
+  }));
+}
+
 function buildWorldPayload() {
   const template = activeTemplate();
   return {
     story: buildStoryText(),
     moviePrompt: buildMoviePrompt(),
+    scenes: buildScenePayloads(),
     template: {
       id: template.id,
       title: template.title,
@@ -584,6 +604,31 @@ function restartSceneMotion() {
   movieFrame.classList.remove("is-shifting");
   void movieFrame.offsetWidth;
   movieFrame.classList.add("is-shifting");
+}
+
+function activePosterUrl(index) {
+  const matchedPoster = state.scenePosters.find((poster) => poster.index === index) || state.scenePosters[index];
+  return matchedPoster?.imageUrl || state.generatedPosterUrl || "";
+}
+
+function applyActivePoster(index) {
+  const imageUrl = activePosterUrl(index);
+  if (!imageUrl) {
+    return;
+  }
+
+  if (generatedPoster.getAttribute("src") !== imageUrl) {
+    generatedPoster.style.opacity = "0";
+    generatedPoster.src = imageUrl;
+    requestAnimationFrame(() => {
+      generatedPoster.style.opacity = "1";
+    });
+  }
+
+  const beat = buildSceneBeats()[index];
+  generatedPoster.alt = beat ? `Generated scene ${index + 1}: ${beat.title}` : "Generated story world";
+  generatedPosterStage.hidden = false;
+  movieFrame.classList.add("has-generated-poster");
 }
 
 function updatePreview() {
@@ -740,6 +785,7 @@ function setActiveShot(index, options = {}) {
   movieFrame.dataset.scene = `scene-${normalizedIndex + 1}`;
   motionProgress.style.width = `${((normalizedIndex + 1) / beats.length) * 100}%`;
   highlightWorldDetails(normalizedIndex);
+  applyActivePoster(normalizedIndex);
   if (movieFrame.classList.contains("is-cinematic") || movieFrame.classList.contains("is-awake")) {
     restartSceneMotion();
   }
@@ -757,6 +803,11 @@ function setActiveShot(index, options = {}) {
 
 function showManualScene(index) {
   clearScenePlayback();
+  if (!state.scenePosters.length && !state.generatedPosterUrl) {
+    setActiveShot(index, { updateStatus: true });
+    return;
+  }
+
   movieFrame.classList.add("is-cinematic", "is-awake");
   movieFrame.classList.remove("is-revealing");
   cinematicButton.textContent = "Replay Reel";
@@ -767,6 +818,11 @@ function showManualScene(index) {
 function startScenePlayback(index = 0) {
   const beats = buildSceneBeats();
   if (!beats.length) {
+    return;
+  }
+
+  if (!state.scenePosters.length && !state.generatedPosterUrl) {
+    cinemaStatus.textContent = "Render scene posters first";
     return;
   }
 
@@ -804,74 +860,122 @@ function showPreviousScene() {
 }
 
 function resetGeneratedPoster() {
-  generatedPoster.hidden = true;
+  state.scenePosters = [];
+  state.generatedPosterUrl = "";
+  generatedPosterStage.hidden = true;
   generatedPoster.removeAttribute("src");
+  generatedPoster.style.opacity = "";
   movieFrame.classList.remove("has-generated-poster", "is-rendering-ai", "is-shifting");
 }
 
 async function requestGeneratedWorld() {
   if (state.aiRequestInFlight) {
-    return;
+    return false;
   }
+
+  const basePayload = buildWorldPayload();
+  const scenes = basePayload.scenes.length ? basePayload.scenes : buildScenePayloads();
 
   state.aiRequestInFlight = true;
   movieFrame.classList.add("is-rendering-ai");
-  cinemaStatus.textContent = "Rendering poster";
+  cinemaStatus.textContent = "Rendering scene posters";
   trackStudioEvent("poster_requested", {
     story_id: activeTemplate().id,
-    story_number: activeTemplate().storyNumber
+    story_number: activeTemplate().storyNumber,
+    poster_count: scenes.length
   });
 
   try {
-    const response = await fetch("/api/create-world", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(buildWorldPayload())
-    });
+    let completed = 0;
+    const sceneResults = await Promise.all(
+      scenes.map(async (scene) => {
+        const response = await fetch("/api/create-world", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            ...basePayload,
+            scenes: [scene]
+          })
+        });
 
-    const result = await response.json().catch(() => ({}));
+        const result = await response.json().catch(() => ({}));
+        completed += 1;
+        cinemaStatus.textContent = `Rendered ${completed} of ${scenes.length}`;
+        motionProgress.style.width = `${12 + Math.round((completed / scenes.length) * 8)}%`;
+        return { responseOk: response.ok, result, scene };
+      })
+    );
 
-    if (!response.ok || !result.ok) {
-      cinemaStatus.textContent = result.blocked ? "Clean rewrite needed" : result.message || "Live reel active";
+    const failed = sceneResults.find((item) => !item.responseOk || !item.result.ok);
+    if (failed) {
+      cinemaStatus.textContent = failed.result.blocked ? "Clean rewrite needed" : failed.result.message || "Open the live site to render scenes";
       trackStudioEvent("poster_failed", {
         story_id: activeTemplate().id,
-        reason: result.blocked ? "moderation" : "request_failed"
+        reason: failed.result.blocked ? "moderation" : "request_failed"
       });
-      return;
+      return false;
     }
 
-    if (!result.configured) {
-      cinemaStatus.textContent = "Live reel active";
+    if (sceneResults.some((item) => !item.result.configured)) {
+      cinemaStatus.textContent = "Open the live site to render scenes";
       trackStudioEvent("poster_local_preview", {
         story_id: activeTemplate().id
       });
-      return;
+      return false;
     }
 
-    if (result.imageUrl) {
-      generatedPoster.src = result.imageUrl;
-      generatedPoster.hidden = false;
-      movieFrame.classList.add("has-generated-poster");
-      cinemaStatus.textContent = state.isPlaying ? "AI poster joined the reel" : "AI poster rendered";
+    const posters = sceneResults
+      .map(({ result, scene }) => {
+        const poster = Array.isArray(result.posters) ? result.posters.find((item) => item?.imageUrl) : null;
+        if (poster) {
+          return {
+            ...poster,
+            index: scene.index,
+            title: scene.title,
+            line: scene.line
+          };
+        }
+
+        if (result.imageUrl) {
+          return {
+            index: scene.index,
+            title: scene.title,
+            line: scene.line,
+            imageUrl: result.imageUrl
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+
+    if (posters.length) {
+      state.scenePosters = posters;
+      state.generatedPosterUrl = posters[0].imageUrl;
+      applyActivePoster(state.activeShotIndex);
+      cinemaStatus.textContent = posters.length === 1 ? "Scene poster ready" : `${posters.length} scene posters ready`;
       trackStudioEvent("poster_generated", {
-        story_id: activeTemplate().id
+        story_id: activeTemplate().id,
+        poster_count: posters.length
       });
-      return;
+      return true;
     }
 
-    cinemaStatus.textContent = "Live reel active";
+    cinemaStatus.textContent = "No scene poster came back";
     trackStudioEvent("poster_failed", {
       story_id: activeTemplate().id,
       reason: "no_image"
     });
+    return false;
   } catch (_error) {
-    cinemaStatus.textContent = "Live reel active";
+    cinemaStatus.textContent = "Open the live site to render scenes";
     trackStudioEvent("poster_failed", {
       story_id: activeTemplate().id,
       reason: "network"
     });
+    return false;
   } finally {
     state.aiRequestInFlight = false;
     movieFrame.classList.remove("is-rendering-ai");
@@ -968,36 +1072,31 @@ function copyMoviePrompt() {
   copyText(moviePrompt.value, copyPromptButton, "Prompt Copied");
 }
 
-function makeCinematic() {
+async function makeCinematic() {
   clearTimeout(state.cinematicTimer);
   clearScenePlayback();
+  resetGeneratedPoster();
   cinematicButton.disabled = true;
-  movieFrame.classList.add("is-building", "is-revealing");
-  movieFrame.classList.remove("is-cinematic", "is-awake", "is-playing");
+  movieFrame.classList.add("is-building");
+  movieFrame.classList.remove("is-cinematic", "is-awake", "is-playing", "is-revealing", "is-shifting");
   setActiveShot(0);
-  motionProgress.style.width = "0%";
-  cinematicButton.textContent = "Awakening";
+  motionProgress.style.width = "12%";
+  cinematicButton.textContent = "Rendering Scenes";
 
-  let revealStep = 0;
+  const rendered = await requestGeneratedWorld();
+  movieFrame.classList.remove("is-building", "is-revealing");
 
-  function advanceReveal() {
-    cinemaStatus.textContent = REVEAL_STEPS[revealStep] || "Rolling scene one";
-    motionProgress.style.width = `${((revealStep + 1) / REVEAL_STEPS.length) * 100}%`;
-    revealStep += 1;
-
-    if (revealStep < REVEAL_STEPS.length) {
-      state.cinematicTimer = setTimeout(advanceReveal, 650);
-      return;
-    }
-
-    state.cinematicTimer = setTimeout(() => {
-      movieFrame.classList.remove("is-building", "is-revealing");
-      startScenePlayback(0);
-      requestGeneratedWorld();
-    }, 520);
+  if (!rendered) {
+    cinematicButton.textContent = "Try Again";
+    cinematicButton.disabled = false;
+    motionProgress.style.width = "0%";
+    return;
   }
 
-  advanceReveal();
+  motionProgress.style.width = "20%";
+  cinematicButton.textContent = "Replay Reel";
+  cinematicButton.disabled = false;
+  startScenePlayback(0);
 }
 
 function writerTemplate() {
