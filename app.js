@@ -9,6 +9,7 @@ const randomizeButton = document.querySelector("#randomizeButton");
 const buildWorldButton = document.querySelector("#buildWorldButton");
 const copyButton = document.querySelector("#copyButton");
 const cinematicButton = document.querySelector("#cinematicButton");
+const narrationToggleButton = document.querySelector("#narrationToggleButton");
 const copyPromptButton = document.querySelector("#copyPromptButton");
 
 const welcomeDescription = document.querySelector("#welcomeDescription");
@@ -155,6 +156,22 @@ const fallbackTemplates = [
 
 const baseTemplates = clone(window.YOUR_STORY_TEMPLATES || fallbackTemplates);
 
+function loadNarrationPreference() {
+  try {
+    return localStorage.getItem("yourStoryNarration") !== "off";
+  } catch (_error) {
+    return true;
+  }
+}
+
+function saveNarrationPreference(value) {
+  try {
+    localStorage.setItem("yourStoryNarration", value ? "on" : "off");
+  } catch (_error) {
+    // Narration still works even if the preference cannot be saved.
+  }
+}
+
 const state = {
   templates: [],
   templateDrafts: {},
@@ -167,7 +184,9 @@ const state = {
   isPlaying: false,
   aiRequestInFlight: false,
   scenePosters: [],
-  generatedPosterUrl: ""
+  generatedPosterUrl: "",
+  narrationEnabled: loadNarrationPreference(),
+  currentNarration: null
 };
 
 function clone(value) {
@@ -267,6 +286,10 @@ function showScreen(id) {
   screens.forEach((screen) => {
     screen.classList.toggle("screen-active", screen.id === id);
   });
+
+  if (id !== "reelScreen") {
+    clearScenePlayback();
+  }
 
   if (id === "storyScreen") {
     trackStudioEvent("story_started", {
@@ -762,9 +785,103 @@ function sparkIdeas() {
   formMessage.textContent = "A fresh set of ideas is ready to reshape.";
 }
 
+function canNarrate() {
+  return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+}
+
+function updateNarrationControl() {
+  if (!narrationToggleButton) {
+    return;
+  }
+
+  if (!canNarrate()) {
+    narrationToggleButton.textContent = "Narration Unavailable";
+    narrationToggleButton.disabled = true;
+    narrationToggleButton.setAttribute("aria-pressed", "false");
+    return;
+  }
+
+  narrationToggleButton.disabled = false;
+  narrationToggleButton.textContent = state.narrationEnabled ? "Narration On" : "Narration Off";
+  narrationToggleButton.setAttribute("aria-pressed", state.narrationEnabled ? "true" : "false");
+}
+
+function stopNarration() {
+  if (!canNarrate()) {
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  state.currentNarration = null;
+}
+
+function preferredNarratorVoice() {
+  if (!canNarrate()) {
+    return null;
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  return voices.find((voice) => /aria|jenny|samantha|google us english/i.test(voice.name))
+    || voices.find((voice) => voice.lang && voice.lang.toLowerCase().startsWith("en"))
+    || null;
+}
+
+function sceneNarrationText(index) {
+  const beat = buildSceneBeats()[index];
+  return beat ? sentenceCase(beat.line) : "";
+}
+
+function scenePlaybackDelay(index) {
+  if (!state.narrationEnabled || !canNarrate()) {
+    return 2400;
+  }
+
+  const wordCount = sceneNarrationText(index).split(/\s+/).filter(Boolean).length;
+  return Math.min(5600, Math.max(3400, wordCount * 430));
+}
+
+function narrateScene(index) {
+  if (!state.narrationEnabled || !canNarrate()) {
+    return;
+  }
+
+  const text = sceneNarrationText(index);
+  if (!text) {
+    return;
+  }
+
+  stopNarration();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.92;
+  utterance.pitch = 0.96;
+  utterance.volume = 0.95;
+  const voice = preferredNarratorVoice();
+  if (voice) {
+    utterance.voice = voice;
+  }
+  state.currentNarration = utterance;
+  window.speechSynthesis.speak(utterance);
+}
+
+function toggleNarration() {
+  state.narrationEnabled = !state.narrationEnabled;
+  saveNarrationPreference(state.narrationEnabled);
+  updateNarrationControl();
+
+  if (!state.narrationEnabled || !canNarrate()) {
+    stopNarration();
+    return;
+  }
+
+  if (state.isPlaying) {
+    narrateScene(state.activeShotIndex);
+  }
+}
+
 function clearScenePlayback() {
   clearTimeout(state.sceneTimer);
   state.sceneTimer = null;
+  stopNarration();
   state.isPlaying = false;
   movieFrame.classList.remove("is-playing");
   replaySceneButton.textContent = "Replay Reel";
@@ -836,6 +953,7 @@ function startScenePlayback(index = 0) {
   cinematicButton.disabled = false;
   setActiveShot(index);
   cinemaStatus.textContent = `Scene ${state.activeShotIndex + 1} moving`;
+  narrateScene(state.activeShotIndex);
 
   if (state.activeShotIndex >= beats.length - 1) {
     state.sceneTimer = setTimeout(() => {
@@ -843,13 +961,13 @@ function startScenePlayback(index = 0) {
       movieFrame.classList.remove("is-playing");
       cinemaStatus.textContent = "World alive";
       replaySceneButton.textContent = "Replay Reel";
-    }, 2200);
+    }, scenePlaybackDelay(state.activeShotIndex));
     return;
   }
 
   state.sceneTimer = setTimeout(() => {
     startScenePlayback(state.activeShotIndex + 1);
-  }, 2400);
+  }, scenePlaybackDelay(state.activeShotIndex));
 }
 
 function showNextScene() {
@@ -1470,6 +1588,9 @@ writerForm.addEventListener("input", () => {
 });
 
 randomizeButton.addEventListener("click", sparkIdeas);
+if (narrationToggleButton) {
+  narrationToggleButton.addEventListener("click", toggleNarration);
+}
 copyButton.addEventListener("click", copyStory);
 copyPromptButton.addEventListener("click", copyMoviePrompt);
 cinematicButton.addEventListener("click", makeCinematic);
@@ -1483,6 +1604,7 @@ writerPlaytestButton.addEventListener("click", playtestWriterDraft);
 loadTemplateDrafts();
 rebuildTemplates();
 selectTemplate(dailyTemplateId());
+updateNarrationControl();
 
 if (new URLSearchParams(window.location.search).get("writer") === "1") {
   showScreen("writerScreen");

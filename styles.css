@@ -274,6 +274,12 @@ h3 {
   border-color: var(--line);
 }
 
+
+.narration-toggle[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--gold) 68%, #ffffff);
+  background: #fff9ea;
+  color: #654812;
+}
 .secondary-action:hover,
 .secondary-action:focus-visible {
   background: #e2e9f2;
