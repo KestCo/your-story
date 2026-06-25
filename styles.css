@@ -726,7 +726,7 @@ h3 {
   --scene-wash-opacity: 0.16;
   --sweep-opacity: 0.42;
   position: relative;
-  min-height: min(72vh, 620px);
+  min-height: clamp(620px, 86vh, 720px);
   overflow: hidden;
   border: 1px solid #253447;
   border-radius: 8px;
@@ -815,7 +815,7 @@ h3 {
 
 .scene-wash {
   position: absolute;
-  inset: 42px 56px 142px;
+  inset: 42px 56px 204px;
   z-index: 4;
   border-radius: 8px;
   pointer-events: none;
@@ -830,7 +830,7 @@ h3 {
 
 .camera-sweep {
   position: absolute;
-  inset: 42px 56px 142px;
+  inset: 42px 56px 204px;
   z-index: 5;
   border-radius: 8px;
   pointer-events: none;
@@ -884,7 +884,7 @@ h3 {
 
 .word-storm {
   position: absolute;
-  inset: 42px 56px 142px;
+  inset: 42px 56px 204px;
   z-index: 4;
   pointer-events: none;
 }
@@ -942,7 +942,7 @@ h3 {
 
 .world-poster {
   position: absolute;
-  inset: 42px 56px 142px;
+  inset: 42px 56px 204px;
   overflow: hidden;
   border: 1px solid rgba(241, 234, 219, 0.18);
   border-radius: 8px;
@@ -956,7 +956,7 @@ h3 {
 
 .generated-poster-stage {
   position: absolute;
-  inset: 42px 56px 142px;
+  inset: 42px 56px 204px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--poster-glow) 52%, transparent);
   border-radius: 8px;
@@ -1001,7 +1001,7 @@ h3 {
 
 .world-tokens {
   position: absolute;
-  inset: 42px 56px 142px;
+  inset: 42px 56px 204px;
   pointer-events: none;
   z-index: 4;
 }
@@ -1422,15 +1422,15 @@ h3 {
 
 .scene-card {
   position: absolute;
-  left: 72px;
-  right: 72px;
-  bottom: 92px;
+  left: 56px;
+  right: 56px;
+  bottom: 76px;
   display: grid;
-  gap: 10px;
-  padding: 22px;
-  border: 1px solid rgba(241, 234, 219, 0.22);
+  gap: 6px;
+  padding: 15px 18px;
+  border: 1px solid rgba(241, 234, 219, 0.18);
   border-radius: 8px;
-  background: rgba(13, 23, 35, 0.78);
+  background: rgba(13, 23, 35, 0.84);
   color: var(--ivory);
   backdrop-filter: blur(8px);
   z-index: 4;
@@ -1451,21 +1451,22 @@ h3 {
 
 .scene-card strong {
   font-family: var(--font-display);
-  font-size: clamp(1.45rem, 3.8vw, 3rem);
+  font-size: clamp(1.25rem, 2.7vw, 2.15rem);
   line-height: 1.05;
 }
 
 .scene-card p {
   margin: 0;
   color: #cbd5e3;
-  font-size: 1rem;
+  font-size: 0.98rem;
+  line-height: 1.36;
 }
 
 .scene-controls {
   position: absolute;
   left: 72px;
   right: 72px;
-  bottom: 26px;
+  bottom: 22px;
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -1522,6 +1523,11 @@ h3 {
   }
 }
 
+
+.world-tokens,
+.word-storm {
+  display: none;
+}
 @keyframes worldRevealCard {
   0% {
     opacity: 0;
@@ -1963,7 +1969,7 @@ h3 {
   }
 
   .movie-frame {
-    min-height: 520px;
+    min-height: 590px;
   }
 
   .world-tokens,
@@ -1977,13 +1983,13 @@ h3 {
   }
 
   .world-poster {
-    inset: 32px 38px 168px;
+    inset: 32px 38px 222px;
   }
 
   .generated-poster-stage,
   .scene-wash,
   .camera-sweep {
-    inset: 32px 38px 168px;
+    inset: 32px 38px 222px;
   }
 
   .poster-hero {
@@ -2004,9 +2010,9 @@ h3 {
   .scene-card {
     left: 42px;
     right: 42px;
-    bottom: 88px;
+    bottom: 86px;
+    padding: 13px 14px;
   }
-
   .scene-controls {
     left: 42px;
     right: 42px;

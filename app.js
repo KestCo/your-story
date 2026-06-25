@@ -6,6 +6,7 @@ const formMessage = document.querySelector("#formMessage");
 const progressCount = document.querySelector("#progressCount");
 const filledCount = document.querySelector("#filledCount");
 const randomizeButton = document.querySelector("#randomizeButton");
+const buildWorldButton = document.querySelector("#buildWorldButton");
 const copyButton = document.querySelector("#copyButton");
 const cinematicButton = document.querySelector("#cinematicButton");
 const copyPromptButton = document.querySelector("#copyPromptButton");
@@ -1019,7 +1020,7 @@ function renderCinematicPlan() {
   setActiveShot(0);
 }
 
-function buildWorld() {
+async function buildWorld() {
   const story = buildStoryText();
   finalStory.textContent = story;
   worldLead.textContent = titleCase(plainValue("hero"));
@@ -1036,6 +1037,28 @@ function buildWorld() {
     story_number: activeTemplate().storyNumber,
     completed_fields: activeTemplate().fields.filter((field) => state.values[field.id]).length
   });
+
+  buildWorldButton.disabled = true;
+  buildWorldButton.textContent = "Building World";
+  cinematicButton.disabled = true;
+  cinemaStatus.textContent = "Building your first scene";
+
+  try {
+    const rendered = await requestGeneratedWorld();
+    if (rendered) {
+      movieFrame.classList.add("is-cinematic");
+      setActiveShot(0);
+      motionProgress.style.width = "20%";
+      cinemaStatus.textContent = "Scene ready";
+      cinematicButton.textContent = "Bring My World Alive";
+    } else {
+      motionProgress.style.width = "0%";
+    }
+  } finally {
+    buildWorldButton.disabled = false;
+    buildWorldButton.textContent = "Build My World";
+    cinematicButton.disabled = false;
+  }
 }
 
 function copyText(text, button, successLabel) {
@@ -1075,6 +1098,14 @@ function copyMoviePrompt() {
 async function makeCinematic() {
   clearTimeout(state.cinematicTimer);
   clearScenePlayback();
+
+  if (state.scenePosters.length || state.generatedPosterUrl) {
+    movieFrame.classList.add("is-cinematic");
+    cinematicButton.textContent = "Replay Reel";
+    startScenePlayback(0);
+    return;
+  }
+
   resetGeneratedPoster();
   cinematicButton.disabled = true;
   movieFrame.classList.add("is-building");
@@ -1370,7 +1401,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
-wordForm.addEventListener("submit", (event) => {
+wordForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   formMessage.textContent = "";
   const problem = validateFields();
@@ -1378,7 +1409,7 @@ wordForm.addEventListener("submit", (event) => {
     formMessage.textContent = problem;
     return;
   }
-  buildWorld();
+  await buildWorld();
 });
 
 storyDraft.addEventListener("input", (event) => {
