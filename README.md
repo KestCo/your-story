@@ -35,7 +35,7 @@ The portal includes a final ready board for story quality checks: blank usage, m
 Set these environment variables in Vercel:
 
 - `OPENAI_API_KEY` - required for generated posters
-- `OPENAI_IMAGE_MODEL` - optional, defaults to `gpt-image-2`
+- `OPENAI_IMAGE_MODEL` - optional, defaults to `gpt-image-1.5`
 - `OPENAI_IMAGE_SIZE` - optional, defaults to `1024x1024`
 - `OPENAI_IMAGE_QUALITY` - optional, defaults to `low`
 

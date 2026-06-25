@@ -23,6 +23,8 @@ const worldSetting = document.querySelector("#worldSetting");
 const worldMood = document.querySelector("#worldMood");
 const worldDetails = document.querySelector("#worldDetails");
 const worldTokens = document.querySelector("#worldTokens");
+const wordStorm = document.querySelector("#wordStorm");
+const worldRevealTitle = document.querySelector("#worldRevealTitle");
 const sceneKicker = document.querySelector("#sceneKicker");
 const sceneTitle = document.querySelector("#sceneTitle");
 const sceneLine = document.querySelector("#sceneLine");
@@ -63,6 +65,24 @@ const SCENE_FIELD_FOCUS = [
   ["color", "feeling"],
   ["sound", "weather"],
   ["secret", "hero"]
+];
+
+const REVEAL_STEPS = [
+  "Gathering your words",
+  "Opening the frame",
+  "Lighting the world",
+  "Rolling scene one"
+];
+
+const WORD_SPARK_POSITIONS = [
+  { x: 16, y: 18, delay: 0 },
+  { x: 64, y: 15, delay: 90 },
+  { x: 12, y: 48, delay: 180 },
+  { x: 70, y: 42, delay: 270 },
+  { x: 18, y: 76, delay: 360 },
+  { x: 66, y: 78, delay: 450 },
+  { x: 42, y: 28, delay: 540 },
+  { x: 44, y: 70, delay: 630 }
 ];
 
 const DEFAULT_WORD_LIMITS = {
@@ -527,6 +547,23 @@ function renderWorldTokens() {
     .join("");
 }
 
+function renderWordStorm() {
+  wordStorm.innerHTML = activeTemplate()
+    .fields.filter((field) => plainValue(field.id))
+    .slice(0, 8)
+    .map((field, index) => {
+      const position = WORD_SPARK_POSITIONS[index % WORD_SPARK_POSITIONS.length];
+      return `
+        <span
+          class="word-spark"
+          data-field-id="${escapeHtml(field.id)}"
+          style="--spark-x: ${position.x}%; --spark-y: ${position.y}%; --spark-delay: ${position.delay}ms;"
+        >${escapeHtml(titleCase(plainValue(field.id)))}</span>
+      `;
+    })
+    .join("");
+}
+
 function highlightWorldDetails(index) {
   const focus = sceneFocusIds(index);
 
@@ -536,6 +573,10 @@ function highlightWorldDetails(index) {
 
   worldTokens.querySelectorAll(".world-token").forEach((token) => {
     token.classList.toggle("active", focus.includes(token.dataset.fieldId));
+  });
+
+  wordStorm.querySelectorAll(".word-spark").forEach((spark) => {
+    spark.classList.toggle("active", focus.includes(spark.dataset.fieldId));
   });
 }
 
@@ -708,6 +749,7 @@ function setActiveShot(index, options = {}) {
 function showManualScene(index) {
   clearScenePlayback();
   movieFrame.classList.add("is-cinematic", "is-awake");
+  movieFrame.classList.remove("is-revealing");
   cinematicButton.textContent = "Replay Reel";
   cinematicButton.disabled = false;
   setActiveShot(index, { updateStatus: true });
@@ -722,6 +764,7 @@ function startScenePlayback(index = 0) {
   clearTimeout(state.sceneTimer);
   state.isPlaying = true;
   movieFrame.classList.add("is-cinematic", "is-awake", "is-playing");
+  movieFrame.classList.remove("is-revealing");
   replaySceneButton.textContent = "Replaying";
   cinematicButton.textContent = "Replay Reel";
   cinematicButton.disabled = false;
@@ -782,7 +825,7 @@ async function requestGeneratedWorld() {
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok || !result.ok) {
-      cinemaStatus.textContent = result.message || "Local preview active";
+      cinemaStatus.textContent = result.blocked ? "Clean rewrite needed" : "Live reel active";
       trackStudioEvent("poster_failed", {
         story_id: activeTemplate().id,
         reason: result.blocked ? "moderation" : "request_failed"
@@ -791,7 +834,7 @@ async function requestGeneratedWorld() {
     }
 
     if (!result.configured) {
-      cinemaStatus.textContent = "Local preview active";
+      cinemaStatus.textContent = "Live reel active";
       trackStudioEvent("poster_local_preview", {
         story_id: activeTemplate().id
       });
@@ -802,20 +845,20 @@ async function requestGeneratedWorld() {
       generatedPoster.src = result.imageUrl;
       generatedPoster.hidden = false;
       movieFrame.classList.add("has-generated-poster");
-      cinemaStatus.textContent = "Poster rendered";
+      cinemaStatus.textContent = "AI poster rendered";
       trackStudioEvent("poster_generated", {
         story_id: activeTemplate().id
       });
       return;
     }
 
-    cinemaStatus.textContent = "Local preview active";
+    cinemaStatus.textContent = "Live reel active";
     trackStudioEvent("poster_failed", {
       story_id: activeTemplate().id,
       reason: "no_image"
     });
   } catch (_error) {
-    cinemaStatus.textContent = "Local preview active";
+    cinemaStatus.textContent = "Live reel active";
     trackStudioEvent("poster_failed", {
       story_id: activeTemplate().id,
       reason: "network"
@@ -858,7 +901,7 @@ function renderCinematicPlan() {
   cinemaStatus.textContent = "Ready";
   cinematicButton.textContent = "Bring My World Alive";
   cinematicButton.disabled = false;
-  movieFrame.classList.remove("is-building", "is-cinematic", "is-awake", "is-playing");
+  movieFrame.classList.remove("is-building", "is-cinematic", "is-awake", "is-playing", "is-revealing");
   updatePosterVisuals();
   setActiveShot(0);
 }
@@ -869,8 +912,10 @@ function buildWorld() {
   worldLead.textContent = titleCase(plainValue("hero"));
   worldSetting.textContent = titleCase(plainValue("place"));
   worldMood.textContent = titleCase(`${plainValue("color")} ${plainValue("feeling")}`);
+  worldRevealTitle.textContent = activeTemplate().title;
   renderWorldDetails();
   renderWorldTokens();
+  renderWordStorm();
   renderCinematicPlan();
   showScreen("reelScreen");
   trackStudioEvent("world_built", {
@@ -918,23 +963,32 @@ function makeCinematic() {
   clearTimeout(state.cinematicTimer);
   clearScenePlayback();
   cinematicButton.disabled = true;
-  movieFrame.classList.add("is-building");
+  movieFrame.classList.add("is-building", "is-revealing");
   movieFrame.classList.remove("is-cinematic", "is-awake", "is-playing");
   setActiveShot(0);
-  cinemaStatus.textContent = "Checking words";
+  motionProgress.style.width = "0%";
   cinematicButton.textContent = "Awakening";
 
-  state.cinematicTimer = setTimeout(() => {
-    cinemaStatus.textContent = "Lighting scene";
+  let revealStep = 0;
+
+  function advanceReveal() {
+    cinemaStatus.textContent = REVEAL_STEPS[revealStep] || "Rolling scene one";
+    motionProgress.style.width = `${((revealStep + 1) / REVEAL_STEPS.length) * 100}%`;
+    revealStep += 1;
+
+    if (revealStep < REVEAL_STEPS.length) {
+      state.cinematicTimer = setTimeout(advanceReveal, 650);
+      return;
+    }
+
     state.cinematicTimer = setTimeout(() => {
-      cinemaStatus.textContent = "Setting motion";
-      state.cinematicTimer = setTimeout(() => {
-        movieFrame.classList.remove("is-building");
-        startScenePlayback(0);
-        requestGeneratedWorld();
-      }, 850);
-    }, 800);
-  }, 800);
+      movieFrame.classList.remove("is-building", "is-revealing");
+      startScenePlayback(0);
+      requestGeneratedWorld();
+    }, 520);
+  }
+
+  advanceReveal();
 }
 
 function writerTemplate() {

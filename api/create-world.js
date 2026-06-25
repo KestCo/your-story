@@ -1,5 +1,5 @@
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-2";
+const IMAGE_MODEL = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
 const IMAGE_SIZE = process.env.OPENAI_IMAGE_SIZE || "1024x1024";
 const IMAGE_QUALITY = process.env.OPENAI_IMAGE_QUALITY || "low";
 
