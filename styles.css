@@ -712,6 +712,19 @@ h3 {
   --sound-opacity: 0.55;
   --sound-opacity-soft: 0.36;
   --poster-zoom: 1;
+  --poster-pan-x: 0px;
+  --poster-pan-y: 0px;
+  --poster-scale: 1.07;
+  --poster-brightness: 1;
+  --poster-saturation: 1;
+  --poster-origin-x: 50%;
+  --poster-origin-y: 50%;
+  --scene-wash-x: 50%;
+  --scene-wash-y: 42%;
+  --scene-wash-size: 34%;
+  --scene-wash-angle: 135deg;
+  --scene-wash-opacity: 0.16;
+  --sweep-opacity: 0.42;
   position: relative;
   min-height: min(72vh, 620px);
   overflow: hidden;
@@ -791,13 +804,47 @@ h3 {
 .camera-vignette {
   position: absolute;
   inset: 0;
-  z-index: 5;
+  z-index: 6;
   pointer-events: none;
   background:
     radial-gradient(circle at 50% 42%, transparent 0 42%, rgba(5, 7, 10, 0.16) 66%, rgba(5, 7, 10, 0.58) 100%),
     linear-gradient(180deg, rgba(5, 7, 10, 0.2), transparent 18%, transparent 72%, rgba(5, 7, 10, 0.28));
   opacity: 0.62;
   transition: opacity 420ms ease;
+}
+
+.scene-wash {
+  position: absolute;
+  inset: 42px 56px 142px;
+  z-index: 4;
+  border-radius: 8px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--scene-wash-x) var(--scene-wash-y), color-mix(in srgb, var(--poster-glow) 46%, transparent), transparent var(--scene-wash-size)),
+    linear-gradient(var(--scene-wash-angle), color-mix(in srgb, var(--poster-accent) 26%, transparent), transparent 56%);
+  mix-blend-mode: screen;
+  opacity: var(--scene-wash-opacity);
+  transform: translate3d(0, 0, 0);
+  transition: background 620ms ease, opacity 620ms ease, transform 620ms ease;
+}
+
+.camera-sweep {
+  position: absolute;
+  inset: 42px 56px 142px;
+  z-index: 5;
+  border-radius: 8px;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 16%, rgba(255, 255, 255, 0.2) 46%, transparent 72%);
+  opacity: 0;
+  transform: translateX(-125%) skewX(-14deg);
+}
+
+.movie-frame.is-shifting .scene-wash {
+  animation: sceneWashPulse 1450ms ease both;
+}
+
+.movie-frame.is-shifting .camera-sweep {
+  animation: cameraSweep 1500ms ease both;
 }
 
 .world-reveal {
@@ -917,9 +964,12 @@ h3 {
   border-radius: 8px;
   object-fit: cover;
   box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.28), 0 22px 70px rgba(0, 0, 0, 0.28);
+  filter: brightness(var(--poster-brightness)) saturate(var(--poster-saturation));
   opacity: 0;
   transform: translateY(10px) scale(0.985);
-  transition: opacity 520ms ease, transform 520ms ease, border-color 420ms ease;
+  transform-origin: var(--poster-origin-x) var(--poster-origin-y);
+  transition: opacity 520ms ease, transform 900ms ease, filter 720ms ease, border-color 420ms ease;
+  will-change: transform, filter;
   z-index: 3;
 }
 
@@ -929,7 +979,12 @@ h3 {
 
 .movie-frame.has-generated-poster .generated-poster {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translate(var(--poster-pan-x), var(--poster-pan-y)) scale(var(--poster-scale));
+}
+
+.movie-frame.is-playing.has-generated-poster .generated-poster,
+.movie-frame.is-shifting.has-generated-poster .generated-poster {
+  transition: transform 1550ms cubic-bezier(0.2, 0.78, 0.2, 1), filter 1200ms ease;
 }
 
 .movie-frame.has-generated-poster .world-poster {
@@ -1263,6 +1318,15 @@ h3 {
   --hero-x: -10px;
   --hero-scale: 0.96;
   --poster-zoom: 1;
+  --poster-pan-x: -4px;
+  --poster-pan-y: 0px;
+  --poster-scale: 1.07;
+  --poster-origin-x: 42%;
+  --poster-origin-y: 42%;
+  --scene-wash-x: 25%;
+  --scene-wash-y: 26%;
+  --scene-wash-size: 38%;
+  --scene-wash-opacity: 0.16;
 }
 
 .movie-frame[data-scene="scene-2"] {
@@ -1270,10 +1334,32 @@ h3 {
   --object-scale: 1.1;
   --object-scale-active: 1.16;
   --poster-zoom: 1.02;
+  --poster-pan-x: 7px;
+  --poster-pan-y: 3px;
+  --poster-scale: 1.11;
+  --poster-origin-x: 62%;
+  --poster-origin-y: 52%;
+  --scene-wash-x: 64%;
+  --scene-wash-y: 38%;
+  --scene-wash-size: 32%;
+  --scene-wash-angle: 210deg;
+  --scene-wash-opacity: 0.22;
 }
 
 .movie-frame[data-scene="scene-3"] {
   --poster-zoom: 1.04;
+  --poster-pan-x: -8px;
+  --poster-pan-y: -5px;
+  --poster-scale: 1.13;
+  --poster-brightness: 1.07;
+  --poster-saturation: 1.12;
+  --poster-origin-x: 58%;
+  --poster-origin-y: 34%;
+  --scene-wash-x: 76%;
+  --scene-wash-y: 24%;
+  --scene-wash-size: 36%;
+  --scene-wash-angle: 150deg;
+  --scene-wash-opacity: 0.26;
 }
 
 .movie-frame[data-scene="scene-3"] .poster-sky {
@@ -1286,6 +1372,18 @@ h3 {
   --sound-scale-active: 1.25;
   --sound-opacity: 0.86;
   --sound-opacity-soft: 0.56;
+  --poster-pan-x: 6px;
+  --poster-pan-y: -8px;
+  --poster-scale: 1.12;
+  --poster-brightness: 0.98;
+  --poster-saturation: 1.16;
+  --poster-origin-x: 46%;
+  --poster-origin-y: 46%;
+  --scene-wash-x: 50%;
+  --scene-wash-y: 32%;
+  --scene-wash-size: 42%;
+  --scene-wash-angle: 80deg;
+  --scene-wash-opacity: 0.24;
 }
 
 .movie-frame[data-scene="scene-5"] {
@@ -1295,6 +1393,18 @@ h3 {
   --object-scale: 1.04;
   --object-scale-active: 1.1;
   --poster-zoom: 1.06;
+  --poster-pan-x: 0px;
+  --poster-pan-y: 7px;
+  --poster-scale: 1.16;
+  --poster-brightness: 1.1;
+  --poster-saturation: 1.08;
+  --poster-origin-x: 50%;
+  --poster-origin-y: 68%;
+  --scene-wash-x: 50%;
+  --scene-wash-y: 62%;
+  --scene-wash-size: 48%;
+  --scene-wash-angle: 0deg;
+  --scene-wash-opacity: 0.3;
 }
 
 .movie-frame[data-scene="scene-5"] .poster-horizon {
@@ -1480,6 +1590,39 @@ h3 {
   100% {
     border-color: rgba(241, 234, 219, 0.22);
     transform: translateY(0);
+  }
+}
+
+@keyframes cameraSweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-125%) skewX(-14deg);
+  }
+
+  24% {
+    opacity: var(--sweep-opacity);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(125%) skewX(-14deg);
+  }
+}
+
+@keyframes sceneWashPulse {
+  0% {
+    opacity: calc(var(--scene-wash-opacity) * 0.42);
+    transform: scale(0.98);
+  }
+
+  42% {
+    opacity: calc(var(--scene-wash-opacity) + 0.12);
+    transform: scale(1.03);
+  }
+
+  100% {
+    opacity: var(--scene-wash-opacity);
+    transform: scale(1);
   }
 }
 
@@ -1829,7 +1972,9 @@ h3 {
     inset: 32px 38px 168px;
   }
 
-  .generated-poster {
+  .generated-poster,
+  .scene-wash,
+  .camera-sweep {
     inset: 32px 38px 168px;
   }
 

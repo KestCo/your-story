@@ -580,6 +580,12 @@ function highlightWorldDetails(index) {
   });
 }
 
+function restartSceneMotion() {
+  movieFrame.classList.remove("is-shifting");
+  void movieFrame.offsetWidth;
+  movieFrame.classList.add("is-shifting");
+}
+
 function updatePreview() {
   storyDraft.innerHTML = buildStoryHtml();
   updateProgress();
@@ -734,6 +740,9 @@ function setActiveShot(index, options = {}) {
   movieFrame.dataset.scene = `scene-${normalizedIndex + 1}`;
   motionProgress.style.width = `${((normalizedIndex + 1) / beats.length) * 100}%`;
   highlightWorldDetails(normalizedIndex);
+  if (movieFrame.classList.contains("is-cinematic") || movieFrame.classList.contains("is-awake")) {
+    restartSceneMotion();
+  }
 
   shotList.querySelectorAll(".shot-card").forEach((shotButton, buttonIndex) => {
     const active = buttonIndex === normalizedIndex;
@@ -797,7 +806,7 @@ function showPreviousScene() {
 function resetGeneratedPoster() {
   generatedPoster.hidden = true;
   generatedPoster.removeAttribute("src");
-  movieFrame.classList.remove("has-generated-poster", "is-rendering-ai");
+  movieFrame.classList.remove("has-generated-poster", "is-rendering-ai", "is-shifting");
 }
 
 async function requestGeneratedWorld() {
@@ -845,7 +854,7 @@ async function requestGeneratedWorld() {
       generatedPoster.src = result.imageUrl;
       generatedPoster.hidden = false;
       movieFrame.classList.add("has-generated-poster");
-      cinemaStatus.textContent = "AI poster rendered";
+      cinemaStatus.textContent = state.isPlaying ? "AI poster joined the reel" : "AI poster rendered";
       trackStudioEvent("poster_generated", {
         story_id: activeTemplate().id
       });
@@ -901,7 +910,7 @@ function renderCinematicPlan() {
   cinemaStatus.textContent = "Ready";
   cinematicButton.textContent = "Bring My World Alive";
   cinematicButton.disabled = false;
-  movieFrame.classList.remove("is-building", "is-cinematic", "is-awake", "is-playing", "is-revealing");
+  movieFrame.classList.remove("is-building", "is-cinematic", "is-awake", "is-playing", "is-revealing", "is-shifting");
   updatePosterVisuals();
   setActiveShot(0);
 }
