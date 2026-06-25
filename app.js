@@ -825,7 +825,7 @@ async function requestGeneratedWorld() {
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok || !result.ok) {
-      cinemaStatus.textContent = result.blocked ? "Clean rewrite needed" : "Live reel active";
+      cinemaStatus.textContent = result.blocked ? "Clean rewrite needed" : result.message || "Live reel active";
       trackStudioEvent("poster_failed", {
         story_id: activeTemplate().id,
         reason: result.blocked ? "moderation" : "request_failed"

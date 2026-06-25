@@ -159,9 +159,17 @@ module.exports = async function handler(req, res) {
       message: "Your world poster is ready."
     });
   } catch (error) {
-    return sendJson(res, error.statusCode || 500, {
+    const statusCode = error.statusCode || 500;
+    const message =
+      statusCode === 401
+        ? "OpenAI key rejected"
+        : error.message || "The world could not be rendered yet.";
+
+    return sendJson(res, statusCode, {
       ok: false,
-      message: error.message || "The world could not be rendered yet."
+      configured: true,
+      upstreamStatus: statusCode,
+      message
     });
   }
 };
