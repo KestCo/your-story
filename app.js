@@ -815,14 +815,47 @@ function stopNarration() {
   state.currentNarration = null;
 }
 
+function narratorVoiceScore(voice) {
+  const name = (voice.name || "").toLowerCase();
+  const lang = (voice.lang || "").toLowerCase();
+  let score = 0;
+
+  if (lang === "en-us") {
+    score += 100;
+  } else if (lang.startsWith("en-")) {
+    score += 40;
+  } else if (lang.startsWith("en")) {
+    score += 20;
+  }
+
+  if (/jenny|aria|guy|david|zira|samantha|alex|google us english/.test(name)) {
+    score += 36;
+  }
+  if (/natural|online|premium/.test(name)) {
+    score += 20;
+  }
+  if (/united states|america|us english|en-us/.test(name)) {
+    score += 14;
+  }
+  if (/british|united kingdom|australia|india|ireland|south africa|canada/.test(name)) {
+    score -= 50;
+  }
+  if (voice.default) {
+    score += 4;
+  }
+
+  return score;
+}
+
 function preferredNarratorVoice() {
   if (!canNarrate()) {
     return null;
   }
 
   const voices = window.speechSynthesis.getVoices();
-  return voices.find((voice) => /aria|jenny|samantha|google us english/i.test(voice.name))
-    || voices.find((voice) => voice.lang && voice.lang.toLowerCase().startsWith("en"))
+  return voices
+    .filter((voice) => voice.lang && voice.lang.toLowerCase().startsWith("en"))
+    .sort((a, b) => narratorVoiceScore(b) - narratorVoiceScore(a))[0]
     || null;
 }
 
@@ -852,8 +885,8 @@ function narrateScene(index) {
 
   stopNarration();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.92;
-  utterance.pitch = 0.96;
+  utterance.rate = 0.98;
+  utterance.pitch = 1;
   utterance.volume = 0.95;
   const voice = preferredNarratorVoice();
   if (voice) {
@@ -1167,8 +1200,9 @@ async function buildWorld() {
       movieFrame.classList.add("is-cinematic");
       setActiveShot(0);
       motionProgress.style.width = "20%";
-      cinemaStatus.textContent = "Scene ready";
-      cinematicButton.textContent = "Bring My World Alive";
+      cinemaStatus.textContent = "World coming alive";
+      cinematicButton.textContent = "Replay Reel";
+      window.setTimeout(() => startScenePlayback(0), 250);
     } else {
       motionProgress.style.width = "0%";
     }
@@ -1605,6 +1639,10 @@ loadTemplateDrafts();
 rebuildTemplates();
 selectTemplate(dailyTemplateId());
 updateNarrationControl();
+if (canNarrate()) {
+  window.speechSynthesis.onvoiceschanged = updateNarrationControl;
+  window.speechSynthesis.getVoices();
+}
 
 if (new URLSearchParams(window.location.search).get("writer") === "1") {
   showScreen("writerScreen");
