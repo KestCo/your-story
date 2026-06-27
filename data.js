@@ -358,5 +358,509 @@ window.YOUR_STORY_TEMPLATES = [
       line: "{sound|sentence} answers the dream with one truth: {secret}."
     },
     moviePromptTemplate: "Create a 12-second family-friendly dreamlike cinematic scene with no on-screen text, logos, subtitles, or watermarks. The dreamer is {hero}, finding {object} beside {place}. The weather is {weather}; the feeling is {feeling}; the world glows {color}; the sound is {sound}. End with the truth that {secret}. Style: surreal storybook realism, beautiful cinematic lighting, smooth dream motion, safe for all ages."
+  },
+  {
+    id: "road-trip-week-2",
+    storyNumber: 6,
+    title: "The Road Trip Detour",
+    tone: "Travel / Road Trip",
+    lengthLabel: "5 scenes",
+    description: "A familiar drive turns into a strange little journey shaped by the player's travel words.",
+    fields: [
+      {
+        id: "hero",
+        label: "Traveler",
+        placeholder: "a kid with a camera",
+        spark: ["a retired bus driver", "two cousins with a map", "a nervous reporter", "a cheerful mechanic"]
+      },
+      {
+        id: "object",
+        label: "Road trip item",
+        placeholder: "a dented thermos",
+        spark: ["a glowing road atlas", "a lucky keychain", "a cooler full of sandwiches", "a postcard with no stamp"]
+      },
+      {
+        id: "place",
+        label: "Roadside stop",
+        placeholder: "a blinking motel sign",
+        spark: ["a desert diner", "a gas station shaped like a rocket", "a covered bridge", "a cornfield rest stop"]
+      },
+      {
+        id: "weather",
+        label: "Road weather",
+        placeholder: "heat lightning",
+        spark: ["dusty wind", "summer rain", "golden sunset", "rolling fog"]
+      },
+      {
+        id: "feeling",
+        label: "Travel feeling",
+        placeholder: "curious",
+        spark: ["restless", "hopeful", "lost but laughing", "wide awake"]
+      },
+      {
+        id: "color",
+        label: "Road color",
+        placeholder: "sunset orange",
+        spark: ["dashboard green", "silver", "highway blue", "neon red"]
+      },
+      {
+        id: "sound",
+        label: "Road sound",
+        placeholder: "tires humming",
+        spark: ["a radio crackle", "cicadas outside the window", "a horn in the distance", "gravel under the wheels"]
+      },
+      {
+        id: "secret",
+        label: "Detour reveal",
+        placeholder: "the wrong turn was on purpose",
+        spark: ["the map had been changing itself", "the road remembered every traveler", "the motel sign was sending a message", "the next exit led home"]
+      }
+    ],
+    storyTemplate: "{hero} carried {object} toward {place} while {weather} crossed the windshield. The drive felt {feeling}, and the road ahead glowed {color}. From outside came {sound}. At the last mile, everyone realized that {secret}.",
+    shotTemplates: [
+      { title: "The Open Road", detail: "{hero|title} travels under {weather}." },
+      { title: "The Stop", detail: "{place|title} appears beside the road." },
+      { title: "The Object", detail: "{object|sentence} starts to matter." },
+      { title: "The Signal", detail: "{sound|sentence} points toward the detour." },
+      { title: "The Reveal", detail: "{secret|sentence}." }
+    ],
+    scene: {
+      kicker: "Road Trip",
+      title: "{place|title} in {color|title} Light",
+      line: "{hero|sentence} follows {sound} toward the truth: {secret}."
+    },
+    moviePromptTemplate: "Create a 12-second family-friendly cinematic road trip scene with no on-screen text, logos, subtitles, or watermarks. The traveler is {hero}, carrying {object}, arriving near {place}. The weather is {weather}. The mood is {feeling}; the road glows {color}; {sound} is heard nearby. End with the reveal that {secret}. Style: polished storybook realism, warm travel atmosphere, cinematic motion, safe for all ages."
+  },
+  {
+    id: "beach-week-2",
+    storyNumber: 7,
+    title: "The Message in the Tide",
+    tone: "Travel / Beach",
+    lengthLabel: "5 scenes",
+    description: "A bright beach day turns into a salt-air mystery with a secret carried by the water.",
+    fields: [
+      {
+        id: "hero",
+        label: "Beach traveler",
+        placeholder: "a shell collector",
+        spark: ["a lifeguard on break", "a child with a bucket", "a vacationing scientist", "a painter with wet shoes"]
+      },
+      {
+        id: "object",
+        label: "Beach find",
+        placeholder: "a bottle with a blue ribbon",
+        spark: ["a pearl compass", "a sand-covered camera", "a cracked surfboard", "a tiny brass telescope"]
+      },
+      {
+        id: "place",
+        label: "Shoreline place",
+        placeholder: "a tide pool cave",
+        spark: ["a striped beach hut", "a pier at low tide", "a dune path", "a quiet cove"]
+      },
+      {
+        id: "weather",
+        label: "Beach weather",
+        placeholder: "sea mist",
+        spark: ["warm drizzle", "a bright breeze", "silver clouds", "sun through salt spray"]
+      },
+      {
+        id: "feeling",
+        label: "Beach feeling",
+        placeholder: "delighted",
+        spark: ["peaceful", "surprised", "sun-dazed", "brave"]
+      },
+      {
+        id: "color",
+        label: "Water color",
+        placeholder: "turquoise",
+        spark: ["coral pink", "sea-glass green", "pearl white", "deep blue"]
+      },
+      {
+        id: "sound",
+        label: "Ocean sound",
+        placeholder: "waves whispering",
+        spark: ["gulls calling", "a shell humming", "a bell buoy", "sand sliding"]
+      },
+      {
+        id: "secret",
+        label: "Tide message",
+        placeholder: "the ocean had written back",
+        spark: ["the tide was drawing a map", "the bottle knew their name", "the cove opened only at sunset", "the shells were tiny bells"]
+      }
+    ],
+    storyTemplate: "{hero} discovered {object} near {place} as {weather} drifted over the beach. The moment felt {feeling}, and the water flashed {color}. Then {sound} rose from the shore. By sunset, the message was clear: {secret}.",
+    shotTemplates: [
+      { title: "Low Tide", detail: "{place|title} appears beneath {weather}." },
+      { title: "Beach Find", detail: "{hero|sentence} discovers {object}." },
+      { title: "Color on Water", detail: "The ocean flashes {color} and feels {feeling}." },
+      { title: "The Shore Speaks", detail: "{sound|sentence} rises from the beach." },
+      { title: "Tide Message", detail: "{secret|sentence}." }
+    ],
+    scene: {
+      kicker: "Beach Travel",
+      title: "{object|title} Near {place|title}",
+      line: "{sound|sentence} carries the shoreline message: {secret}."
+    },
+    moviePromptTemplate: "Create a 12-second family-friendly cinematic beach mystery scene with no on-screen text, logos, subtitles, or watermarks. The beach traveler is {hero}, finding {object} near {place}. The weather is {weather}; the feeling is {feeling}; the water glows {color}; {sound} comes from the shore. End with the reveal that {secret}. Style: elegant coastal storybook realism, bright natural light, gentle wonder, safe for all ages."
+  },
+  {
+    id: "mountain-pass-week-2",
+    storyNumber: 8,
+    title: "The Mountain Pass",
+    tone: "Travel / Mountains",
+    lengthLabel: "5 scenes",
+    description: "A climb into the mountains becomes a high-altitude adventure with a secret above the clouds.",
+    fields: [
+      {
+        id: "hero",
+        label: "Mountain traveler",
+        placeholder: "a careful climber",
+        spark: ["a backpacking teacher", "a young trail guide", "a lost photographer", "a grandparent with binoculars"]
+      },
+      {
+        id: "object",
+        label: "Mountain item",
+        placeholder: "a carved walking stick",
+        spark: ["a frost-covered compass", "a red climbing rope", "a notebook full of peaks", "a lantern with a blue flame"]
+      },
+      {
+        id: "place",
+        label: "High place",
+        placeholder: "a stone lookout",
+        spark: ["a snow bridge", "a cliffside cabin", "a meadow above the clouds", "a narrow mountain pass"]
+      },
+      {
+        id: "weather",
+        label: "Mountain weather",
+        placeholder: "thin snow",
+        spark: ["a sudden cloudbank", "crisp wind", "distant thunder", "sunlight through mist"]
+      },
+      {
+        id: "feeling",
+        label: "Climb feeling",
+        placeholder: "determined",
+        spark: ["breathless", "awed", "steady", "small but brave"]
+      },
+      {
+        id: "color",
+        label: "Summit color",
+        placeholder: "ice blue",
+        spark: ["pine green", "rose gold", "storm gray", "snow white"]
+      },
+      {
+        id: "sound",
+        label: "Mountain sound",
+        placeholder: "an eagle cry",
+        spark: ["boots on stone", "wind in the pines", "a far avalanche", "a bell from nowhere"]
+      },
+      {
+        id: "secret",
+        label: "Summit secret",
+        placeholder: "the mountain was listening",
+        spark: ["the pass moved each night", "the clouds were hiding a city", "the old trail chose its travelers", "the summit kept one promise"]
+      }
+    ],
+    storyTemplate: "{hero} climbed with {object} toward {place} while {weather} moved over the ridge. The ascent felt {feeling}, and the stones shone {color}. Above the trail came {sound}. At the summit, the secret waited: {secret}.",
+    shotTemplates: [
+      { title: "The Climb", detail: "{hero|title} climbs with {object}." },
+      { title: "The Pass", detail: "{place|title} appears through {weather}." },
+      { title: "High Color", detail: "The ridge turns {color} and feels {feeling}." },
+      { title: "Mountain Signal", detail: "{sound|sentence} echoes above the trail." },
+      { title: "Summit Secret", detail: "{secret|sentence}." }
+    ],
+    scene: {
+      kicker: "Mountain Travel",
+      title: "{place|title} Above the Clouds",
+      line: "{hero|sentence} hears {sound} before discovering that {secret}."
+    },
+    moviePromptTemplate: "Create a 12-second family-friendly cinematic mountain adventure scene with no on-screen text, logos, subtitles, or watermarks. The traveler is {hero}, carrying {object}, climbing toward {place}. The weather is {weather}; the climb feels {feeling}; the mountain glows {color}; {sound} echoes nearby. End with the reveal that {secret}. Style: grand storybook realism, sweeping mountain light, cinematic scale, safe for all ages."
+  },
+  {
+    id: "national-park-week-2",
+    storyNumber: 9,
+    title: "The Park Ranger's Map",
+    tone: "Travel / National Park",
+    lengthLabel: "5 scenes",
+    description: "A national park visit opens into a nature mystery filled with trails, wildlife, and hidden signs.",
+    fields: [
+      {
+        id: "hero",
+        label: "Park visitor",
+        placeholder: "a junior ranger",
+        spark: ["a birdwatcher", "a family on their first hike", "a sketchbook artist", "a quiet park ranger"]
+      },
+      {
+        id: "object",
+        label: "Park object",
+        placeholder: "a folded trail map",
+        spark: ["a wooden ranger badge", "a mossy compass", "a camera with one photo", "a pinecone marked with gold"]
+      },
+      {
+        id: "place",
+        label: "Park landmark",
+        placeholder: "a waterfall overlook",
+        spark: ["a redwood grove", "a geyser boardwalk", "a canyon trail", "a meadow full of elk"]
+      },
+      {
+        id: "weather",
+        label: "Park weather",
+        placeholder: "morning mist",
+        spark: ["soft rain", "sun through branches", "mountain wind", "a curtain of fog"]
+      },
+      {
+        id: "feeling",
+        label: "Park feeling",
+        placeholder: "amazed",
+        spark: ["quiet", "watchful", "free", "grateful"]
+      },
+      {
+        id: "color",
+        label: "Nature color",
+        placeholder: "fern green",
+        spark: ["granite gray", "river blue", "sunlit gold", "wildflower purple"]
+      },
+      {
+        id: "sound",
+        label: "Park sound",
+        placeholder: "water over rocks",
+        spark: ["a woodpecker tapping", "branches creaking", "distant thunder", "a ranger whistle"]
+      },
+      {
+        id: "secret",
+        label: "Trail secret",
+        placeholder: "the map showed tomorrow's trail",
+        spark: ["the oldest tree was a doorway", "the waterfall answered questions", "the animals were guarding a path", "the stars had drawn the trail first"]
+      }
+    ],
+    storyTemplate: "{hero} followed {object} through {place} while {weather} settled over the park. The forest felt {feeling}, and everything glowed {color}. Along the trail came {sound}. By the final marker, the truth was waiting: {secret}.",
+    shotTemplates: [
+      { title: "Trailhead", detail: "{hero|title} follows {object}." },
+      { title: "Landmark", detail: "{place|title} appears beneath {weather}." },
+      { title: "Nature Glow", detail: "The park turns {color} and feels {feeling}." },
+      { title: "Trail Sound", detail: "{sound|sentence} moves through the trees." },
+      { title: "Final Marker", detail: "{secret|sentence}." }
+    ],
+    scene: {
+      kicker: "National Park",
+      title: "{place|title} in {color|title}",
+      line: "{sound|sentence} guides {hero} to the trail secret: {secret}."
+    },
+    moviePromptTemplate: "Create a 12-second family-friendly cinematic national park mystery scene with no on-screen text, logos, subtitles, or watermarks. The visitor is {hero}, following {object} through {place}. The weather is {weather}; the mood is {feeling}; nature glows {color}; {sound} moves through the landscape. End with the reveal that {secret}. Style: majestic nature storybook realism, cinematic outdoor light, safe for all ages."
+  },
+  {
+    id: "international-arrival-week-2",
+    storyNumber: 10,
+    title: "The International Arrival",
+    tone: "Travel / International",
+    lengthLabel: "5 scenes",
+    description: "A trip abroad turns a busy arrival into a warm, cinematic discovery.",
+    fields: [
+      {
+        id: "hero",
+        label: "World traveler",
+        placeholder: "a first-time traveler",
+        spark: ["a journalist with one suitcase", "a student exchange visitor", "a chef chasing a recipe", "a grandmother with a camera"]
+      },
+      {
+        id: "object",
+        label: "Travel object",
+        placeholder: "a stamped passport",
+        spark: ["a train ticket", "a phrasebook with notes", "a red umbrella", "a small wooden box"]
+      },
+      {
+        id: "place",
+        label: "Faraway place",
+        placeholder: "a lantern-lit plaza",
+        spark: ["a busy street market", "a train station under glass", "a bridge over old canals", "a cafe beside a cathedral"]
+      },
+      {
+        id: "weather",
+        label: "City weather",
+        placeholder: "evening rain",
+        spark: ["warm wind", "morning haze", "snow over rooftops", "sun after a storm"]
+      },
+      {
+        id: "feeling",
+        label: "Arrival feeling",
+        placeholder: "wide-eyed",
+        spark: ["homesick but happy", "bold", "lost in the best way", "curious"]
+      },
+      {
+        id: "color",
+        label: "City color",
+        placeholder: "golden yellow",
+        spark: ["tile blue", "market red", "olive green", "midnight silver"]
+      },
+      {
+        id: "sound",
+        label: "City sound",
+        placeholder: "a train bell",
+        spark: ["music from a balcony", "a vendor calling", "rain on awnings", "footsteps on stone"]
+      },
+      {
+        id: "secret",
+        label: "Travel surprise",
+        placeholder: "the city had been expecting them",
+        spark: ["the phrasebook contained a hidden invitation", "the ticket was older than the station", "the plaza lights answered in code", "the recipe belonged to everyone"]
+      }
+    ],
+    storyTemplate: "{hero} arrived with {object} at {place} while {weather} moved through the city. The first hour felt {feeling}, and the streets shone {color}. Nearby, {sound} filled the air. Then the trip changed forever: {secret}.",
+    shotTemplates: [
+      { title: "Arrival", detail: "{hero|title} arrives with {object}." },
+      { title: "The City", detail: "{place|title} glows under {weather}." },
+      { title: "First Hour", detail: "The streets turn {color} and feel {feeling}." },
+      { title: "Local Sound", detail: "{sound|sentence} fills the air." },
+      { title: "Travel Surprise", detail: "{secret|sentence}." }
+    ],
+    scene: {
+      kicker: "International Travel",
+      title: "{place|title} at Arrival",
+      line: "{hero|sentence} hears {sound}, then learns that {secret}."
+    },
+    moviePromptTemplate: "Create a 12-second family-friendly cinematic international travel scene with no on-screen text, logos, subtitles, or watermarks. The traveler is {hero}, carrying {object}, arriving at {place}. The weather is {weather}; the arrival feels {feeling}; the city glows {color}; {sound} fills the air. End with the reveal that {secret}. Style: refined global travel storybook realism, warm human detail, cinematic city light, safe for all ages."
+  },
+  {
+    id: "space-crossing-week-2",
+    storyNumber: 11,
+    title: "The Space Crossing",
+    tone: "Travel / Space",
+    lengthLabel: "5 scenes",
+    description: "A voyage beyond Earth lets the player's words build a bright, cinematic space adventure.",
+    fields: [
+      {
+        id: "hero",
+        label: "Space traveler",
+        placeholder: "a rookie astronaut",
+        spark: ["a space botanist", "a kid stowaway", "a calm mission pilot", "a robot cartographer"]
+      },
+      {
+        id: "object",
+        label: "Space object",
+        placeholder: "a glowing star map",
+        spark: ["a cracked helmet", "a silver seed pod", "a comet compass", "a floating lunchbox"]
+      },
+      {
+        id: "place",
+        label: "Cosmic destination",
+        placeholder: "a moon station",
+        spark: ["an asteroid garden", "a ringed planet harbor", "a glass observatory", "a silent space elevator"]
+      },
+      {
+        id: "weather",
+        label: "Space condition",
+        placeholder: "meteor rain",
+        spark: ["solar wind", "starlight fog", "a comet shower", "blue static"]
+      },
+      {
+        id: "feeling",
+        label: "Voyage feeling",
+        placeholder: "weightless",
+        spark: ["astonished", "steady", "tiny in the universe", "fearless"]
+      },
+      {
+        id: "color",
+        label: "Cosmic color",
+        placeholder: "nebula violet",
+        spark: ["planet gold", "oxygen blue", "comet white", "deep-space green"]
+      },
+      {
+        id: "sound",
+        label: "Space sound",
+        placeholder: "a radio whisper",
+        spark: ["engines humming", "a distant beacon", "static like rain", "a soft alarm"]
+      },
+      {
+        id: "secret",
+        label: "Cosmic reveal",
+        placeholder: "the stars were making a map",
+        spark: ["the moon station had a heartbeat", "the comet was carrying a message", "the planet was not alone", "home looked back"]
+      }
+    ],
+    storyTemplate: "{hero} carried {object} toward {place} while {weather} crossed the stars. The voyage felt {feeling}, and space shimmered {color}. Over the radio came {sound}. Beyond the last orbit, the truth appeared: {secret}.",
+    shotTemplates: [
+      { title: "Launch Into Quiet", detail: "{hero|title} travels with {object}." },
+      { title: "Destination", detail: "{place|title} appears beyond {weather}." },
+      { title: "Cosmic Color", detail: "Space turns {color} and feels {feeling}." },
+      { title: "Signal", detail: "{sound|sentence} arrives over the radio." },
+      { title: "Beyond Orbit", detail: "{secret|sentence}." }
+    ],
+    scene: {
+      kicker: "Space Travel",
+      title: "{place|title} Beyond Orbit",
+      line: "{sound|sentence} reaches {hero} with the truth: {secret}."
+    },
+    moviePromptTemplate: "Create a 12-second family-friendly cinematic space travel scene with no on-screen text, logos, subtitles, or watermarks. The space traveler is {hero}, carrying {object}, heading toward {place}. The space condition is {weather}; the voyage feels {feeling}; the cosmos glows {color}; {sound} comes through the radio. End with the reveal that {secret}. Style: elegant hopeful science-fiction storybook realism, cinematic starlight, safe for all ages."
+  },
+  {
+    id: "time-ticket-week-2",
+    storyNumber: 12,
+    title: "The Time Travel Ticket",
+    tone: "Travel / Time Travel",
+    lengthLabel: "5 scenes",
+    description: "The week's wild finale sends a traveler through time with one strange ticket and one impossible reveal.",
+    fields: [
+      {
+        id: "hero",
+        label: "Time traveler",
+        placeholder: "a museum guard",
+        spark: ["a kid with an old watch", "a newspaper photographer", "a retired inventor", "a teacher chasing a bell"]
+      },
+      {
+        id: "object",
+        label: "Time object",
+        placeholder: "a ticket stamped tomorrow",
+        spark: ["a pocket watch without hands", "a glowing train pass", "a calendar page from 1899", "a suitcase full of clocks"]
+      },
+      {
+        id: "place",
+        label: "Time doorway",
+        placeholder: "an empty train platform",
+        spark: ["a museum hallway", "a clock tower elevator", "a street that repeats", "a theater from the future"]
+      },
+      {
+        id: "weather",
+        label: "Time weather",
+        placeholder: "rain falling upward",
+        spark: ["frozen lightning", "clockwork snow", "wind from yesterday", "sunlight arriving late"]
+      },
+      {
+        id: "feeling",
+        label: "Time feeling",
+        placeholder: "astonished",
+        spark: ["uneasy", "thrilled", "homesick for tomorrow", "brave enough"]
+      },
+      {
+        id: "color",
+        label: "Time color",
+        placeholder: "antique gold",
+        spark: ["future blue", "sepia brown", "electric green", "midnight purple"]
+      },
+      {
+        id: "sound",
+        label: "Time sound",
+        placeholder: "a clock striking thirteen",
+        spark: ["a train whistle backward", "pages turning fast", "footsteps from tomorrow", "a bell that rings twice"]
+      },
+      {
+        id: "secret",
+        label: "Time reveal",
+        placeholder: "the future had sent the invitation",
+        spark: ["yesterday was waiting at the station", "the ticket only worked once", "the oldest clock remembered tomorrow", "someone had already changed the ending"]
+      }
+    ],
+    storyTemplate: "{hero} found {object} at {place} just as {weather} bent the air. The jump felt {feeling}, and time flashed {color}. Then {sound} echoed from another year. When the doors opened, the answer was impossible: {secret}.",
+    shotTemplates: [
+      { title: "The Ticket", detail: "{hero|title} finds {object}." },
+      { title: "The Doorway", detail: "{place|title} bends beneath {weather}." },
+      { title: "The Jump", detail: "Time turns {color} and feels {feeling}." },
+      { title: "Another Year", detail: "{sound|sentence} echoes through time." },
+      { title: "Impossible Answer", detail: "{secret|sentence}." }
+    ],
+    scene: {
+      kicker: "Time Travel",
+      title: "{object|title} at {place|title}",
+      line: "{sound|sentence} echoes before {hero} learns that {secret}."
+    },
+    moviePromptTemplate: "Create a 12-second family-friendly cinematic time travel scene with no on-screen text, logos, subtitles, or watermarks. The time traveler is {hero}, finding {object} at {place}. The time weather is {weather}; the jump feels {feeling}; time flashes {color}; {sound} echoes from another year. End with the reveal that {secret}. Style: elegant storybook science fantasy, cinematic clockwork light, mysterious but safe for all ages."
   }
 ];
